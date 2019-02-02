@@ -5,8 +5,21 @@
     <script src="js_david/main.js" defer></script>
 
     <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
         div#assets {
             display: none;
+        }
+
+        canvas#main-canvas {
+            position: fixed;
+            top: 0; right: 0; bottom: 0; left: 0;
+
+            width: 1280px;
+            height: 675px;
         }
     </style>
 </head>
@@ -27,10 +40,13 @@
     <img src="assets/player2damaged.png" id="player2-damaged">
 
     <!-- BACKGROUND ELEMENTS -->
+    <img src="assets/plant.png" id="plant">
+    <img src="assets/couch.png" id="couch">
+    <img src="assets/largeCouch.png" id="large-couch">
 
     <!-- OTHER ASSETS -->
     <img src="assets/boombox.png" id="boombox">
 </div>
-<canvas id="main-canvas"></canvas>
+<canvas id="main-canvas" width="2560" height="1350"></canvas>
 </body>
 </html>
