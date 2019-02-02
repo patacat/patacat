@@ -3,7 +3,17 @@
 let canvas;
 let ctx;
 let assets = {};
+let cats = [];
 let keys = {};
+
+const SLOTS = [
+	{x: 350, y: 760, angle: 0},
+	{x: 590, y: 780, angle: 73},
+
+	{x: 1720, y: 825, angle: 0},
+	{x: 1930, y: 825, angle: 0},
+	{x: 2140, y: 825, angle: 0},
+];
 
 let width = 2560; // TODO
 let height = 1350; // TODO
@@ -15,7 +25,7 @@ let height = 1350; // TODO
 // Players
 
 const player1 = {
-	x: 0.25 * width - 100,
+	x: 0.25 * width + 50,
 	y: 0.3 * height,
 
 	damaged: false,
@@ -25,7 +35,7 @@ const player1 = {
 };
 
 const player2 = {
-	x: 0.75 * width - 100,
+	x: 0.75 * width - 50,
 	y: 0.3 * height,
 
 	damaged: false,
@@ -107,21 +117,35 @@ const update = () => {
 	player2.y -= Math.sin(player2.dir) * player2.v;
 };
 
+const drawCatInSlot = (cat, slot) => {
+	ctx.translate(slot.x, slot.y);
+	ctx.rotate(slot.angle * Math.PI / 180);
+	ctx.drawImage(cat.asset["img"], 0, -cat.draw_height, 200, cat.draw_height);
+	ctx.rotate(-slot.angle * Math.PI / 180);
+	ctx.translate(-slot.x, -slot.y);
+};
+
 const draw = () => {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 	// Temp Cats
-	ctx.drawImage(assets["cat-rockin"]["img"], 1720, 825 - 179, 200, 179);
-	ctx.drawImage(assets["cat-alvin"]["img"], 1920, 825 - 101, 200, 101);
-	ctx.drawImage(assets["cat-sandwich"]["img"], 2140, 825 - 142, 200, 142);
+	// ctx.drawImage(assets["cat-rockin"]["img"], 1720, 825 - 179, 200, 179);
+	// ctx.drawImage(assets["cat-alvin"]["img"], 1920, 825 - 101, 200, 101);
+	// ctx.drawImage(assets["cat-sandwich"]["img"], 2140, 825 - 142, 200, 142);
+	//
+	// ctx.drawImage(assets["cat-fake"]["img"], 350, 770 - 154, 200, 154);
+	//
+	// ctx.translate(700, 870 - 117);
+	// ctx.rotate(70 * Math.PI/180);
+	// ctx.drawImage(assets["cat-cute"]["img"], 0, 0, 200, 117);
+	// ctx.rotate(-70 * Math.PI/180);
+	// ctx.translate(-700, -(870 - 117));
 
-	ctx.drawImage(assets["cat-fake"]["img"], 350, 770 - 154, 200, 154);
-
-	ctx.translate(700, 870 - 117);
-	ctx.rotate(70 * Math.PI/180);
-	ctx.drawImage(assets["cat-cute"]["img"], 0, 0, 200, 117);
-	ctx.rotate(-70 * Math.PI/180);
-	ctx.translate(-700, -(870 - 117));
+	drawCatInSlot(cats[0], SLOTS[0]);
+	drawCatInSlot(cats[3], SLOTS[1]);
+	drawCatInSlot(cats[0], SLOTS[2]);
+	drawCatInSlot(cats[0], SLOTS[3]);
+	drawCatInSlot(cats[0], SLOTS[4]);
 
 
 	// Draw Background
@@ -159,6 +183,16 @@ document.addEventListener("DOMContentLoaded", () => {
 		assets[img.id]["img"] = img;
 		assets[img.id]["w"] = img.width;
 		assets[img.id]["h"] = img.height;
+	}
+
+	for (let k in assets) {
+		if (!assets.hasOwnProperty(k)) continue;
+		if (k.substr(0, 4) === "cat-") {
+			cats.push({
+				asset: assets[k],
+				draw_height: 200 * (assets[k]["h"] / assets[k]["w"])
+			});
+		}
 	}
 
 	window.addEventListener("keyup", e => {
