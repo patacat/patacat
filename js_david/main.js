@@ -15,8 +15,8 @@ let height = 1350; // TODO
 // Players
 
 const player1 = {
-	x: 0.25 * width,
-	y: 0.5 * height,
+	x: 0.25 * width - 100,
+	y: 0.3 * height,
 
 	damaged: false,
 
@@ -25,8 +25,8 @@ const player1 = {
 };
 
 const player2 = {
-	x: 0.75 * width,
-	y: 0.5 * height,
+	x: 0.75 * width - 100,
+	y: 0.3 * height,
 
 	damaged: false,
 
@@ -110,11 +110,26 @@ const update = () => {
 const draw = () => {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+	// Temp Cats
+	ctx.drawImage(assets["cat-rockin"]["img"], 1720, 825 - 179, 200, 179);
+	ctx.drawImage(assets["cat-alvin"]["img"], 1920, 825 - 101, 200, 101);
+	ctx.drawImage(assets["cat-sandwich"]["img"], 2140, 825 - 142, 200, 142);
+
+	ctx.drawImage(assets["cat-fake"]["img"], 350, 770 - 154, 200, 154);
+
+	ctx.translate(700, 870 - 117);
+	ctx.rotate(70 * Math.PI/180);
+	ctx.drawImage(assets["cat-cute"]["img"], 0, 0, 200, 117);
+	ctx.rotate(-70 * Math.PI/180);
+	ctx.translate(-700, -(870 - 117));
+
+
 	// Draw Background
 	ctx.drawImage(assets["plant"]["img"], 20, 680, 245, 500);
 
 	ctx.drawImage(assets["couch"]["img"], 200, 730, 508, 450);
 	ctx.drawImage(assets["large-couch"]["img"], 1400, 800, 1000, 366);
+
 
 	// Player 1
 	ctx.drawImage(assets["player1" + (player1.damaged ? "-damaged" : "")]["img"],
