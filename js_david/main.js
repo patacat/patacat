@@ -2,17 +2,22 @@
 let gs = 1.0;
 const scale = window.devicePixelRatio;
 
-const songs = [];
-for (let i = 1; i <= 24; i++) {
-    songs.push(`assets/songs/${i}.mp3`);
+function randomRetriever(count, creator) {
+    const options = [];
+    for (let i = 0; i < count; i++) {
+        options.push(creator(i));
+    }
+    let current = 0;
+    return {
+        retrieve: function () {
+            current = (current + 1 + Math.floor(Math.random() * (options.length - 1))) % options.length;
+            return options[current];
+        }
+    };
 }
 
-const meows = [];
-for (let i = 1; i <= 83; i++) {
-    meows.push(`assets/meows/${i}.m4a`);
-}
-
-let currentSong = 0;
+const songRetriever = randomRetriever(24, (i) => { return "assets/songs/" + (i + 1) + ".mp3"; });
+const meowRetriever = randomRetriever(83, (i) => { return "assets/meows/" + (i + 1) + ".m4a"; });
 
 let canvas;
 let ctx;
@@ -93,7 +98,7 @@ class Cat {
             if (this.pattedTime === 0) {
                 this.pattedTime = time;
                 this.pattedFrame = 1;
-                let meow = new Audio(meows[Math.floor(Math.random() * meows.length)]);
+                let meow = new Audio(meowRetriever.retrieve());
                 meow.play();
                 console.log("meow");
             } else if (time - this.pattedTime > PAT_FRAME_LENGTH && this.pattedFrame <= 4) {
@@ -435,12 +440,9 @@ const gameLoop = () => {
 
 
 const changeSound = () => {
-    let randSong = Math.floor(Math.random() * songs.length);
-    while (randSong === currentSong) {
-        randSong = Math.floor(Math.random() * songs.length);
-    }
-
-    document.getElementById("beats").src = songs[randSong];
+    const newSong = songRetriever.retrieve();
+    console.log(`Changing song to ${newSong}`);
+    document.getElementById("beats").src = newSong;
 };
 
 const computeScale = () => {
