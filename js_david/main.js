@@ -19,6 +19,9 @@ let back = 1;
 
 let currentCats = [];
 
+let player1ScoreEl;
+let player2ScoreEl;
+
 const SLOTS = [
 	{x: 450, y: 760, angle: 0, occupied: false},
 	{x: 600, y: 880, angle: 73, occupied: false},
@@ -126,7 +129,14 @@ const player1 = {
 	patting: false,
 
 	v: 0,
-	dir: 0
+	dir: 0,
+
+	score: 0,
+
+	addScore: function (s) {
+		this.score += s;
+		player1ScoreEl.innerHTML = this.score.toFixed();
+	}
 };
 
 const player2 = {
@@ -137,7 +147,14 @@ const player2 = {
 	patting: false,
 
 	v: 0,
-	dir: 0
+	dir: 0,
+
+	score: 0,
+
+	addScore: function (s) {
+		this.score += s;
+		player2ScoreEl.innerHTML = this.score.toFixed();
+	}
 };
 
 
@@ -237,7 +254,7 @@ const update = (time) => {
 					if (!c.patted) {
 						c.patted = true;
 						c.pattedTime = time;
-						console.log("pat", c);
+						player1.addScore(10);
 					}
 				}
 			});
@@ -258,6 +275,7 @@ const update = (time) => {
 					if (!c.patted) {
 						c.patted = true;
 						c.pattedTime = time;
+						player2.addScore(10);
 					}
 				}
 			});
@@ -307,6 +325,7 @@ const update = (time) => {
 		const oldFire = fire;
 		while (fire === oldFire) fire = Math.round(1 + Math.random() * 3);
 
+		// noinspection UnnecessaryLocalVariableJS
 		const oldBack = back;
 		while (back === oldBack) back = Math.round(1 + Math.random() * 3);
 	}
@@ -386,6 +405,12 @@ const draw = () => {
 
 	// ctx.drawImage(assets["fire1" + (player2.damaged ? "-damaged" : "")]["img"],
 	// 	player2.x - 60, player2.y - 80, 20, 20);
+
+
+	// Scoring
+
+	ctx.drawImage(assets["coin"]["img"], width - 950, 50, 100, 100);
+	ctx.drawImage(assets["coin"]["img"], width - 500, 50, 100, 100);
 };
 
 
@@ -430,6 +455,9 @@ document.addEventListener("DOMContentLoaded", () => {
 			});
 		}
 	}
+
+	player1ScoreEl = document.getElementById("player1-score-value");
+	player2ScoreEl = document.getElementById("player2-score-value");
 
 	window.addEventListener("keyup", e => {
 		keys[e.key] = false;
