@@ -15,8 +15,12 @@ function randomRetriever(count, creator) {
     };
 }
 
-const songRetriever = randomRetriever(24, (i) => { return "assets/songs/" + (i + 1) + ".mp3"; });
-const meowRetriever = randomRetriever(83, (i) => { return "assets/meows/" + (i + 1) + ".m4a"; });
+const songRetriever = randomRetriever(24, (i) => {
+    return `assets/songs/${i + 1}.mp3`;
+});
+const meowRetriever = randomRetriever(83, (i) => {
+    return `assets/meows/${i + 1}.m4a`;
+});
 
 let canvas;
 let ctx;
