@@ -15,6 +15,7 @@ let keys = {};
 
 let fireTime = 0;
 let fire = 1;
+let back = 1;
 
 let currentCats = [];
 
@@ -305,6 +306,9 @@ const update = (time) => {
 		// noinspection UnnecessaryLocalVariableJS
 		const oldFire = fire;
 		while (fire === oldFire) fire = Math.round(1 + Math.random() * 3);
+
+		const oldBack = back;
+		while (back === oldBack) back = Math.round(1 + Math.random() * 3);
 	}
 };
 
@@ -327,6 +331,8 @@ const draw = () => {
 	ctx.drawImage(assets["wallpaper"]["img"], 0, 0, 2883, 1350);
 	ctx.drawImage(assets["floor"]["img"], -30, height - 340, 3101, 400);
 
+	ctx.drawImage(assets["fireback"]["img"], 877, 866, 340, 272);
+	ctx.drawImage(assets["back" + back.toString()]["img"], 883, 866, 330, 263);
 	ctx.drawImage(assets["fireplace"]["img"], 630, -20, 832, 1160);
 
 	ctx.drawImage(assets["art1"]["img"], 1690, 260, 480, 337);
@@ -342,7 +348,7 @@ const draw = () => {
 
 	ctx.drawImage(assets["boombox"]["img"], 930, 478, 250, 164);
 
-	ctx.drawImage(assets["fire" + fire.toString()]["img"], 920, 890, 240, 244);
+	ctx.drawImage(assets["fire" + fire.toString()]["img"], 920, 880, 240, 244);
 
 	ctx.drawImage(assets["pot"]["img"], 1200, 468, 202, 150);
 	ctx.drawImage(assets["other-pot"]["img"], 680, 395, 240, 222);
