@@ -321,10 +321,6 @@ const drawCatInSlot = (cat, slot, fraction, pattedFrame) => {
 	ctx.translate(-slot.x, -slot.y);
 };
 
-const getCatPat = (slot, fraction) => {
-	// TODO
-};
-
 const draw = () => {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
