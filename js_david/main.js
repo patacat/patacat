@@ -35,22 +35,20 @@ let back = 1;
 
 const RANDOM_ART = 1 + Math.floor(Math.random() * 4);
 
-let currentCats = [];
-
 let player1ScoreEl;
 let player2ScoreEl;
 
 const SLOTS = [
-    {x: 450, y: 760, angle: 0, occupied: false},
-    {x: 600, y: 880, angle: 73, occupied: false},
+    {x: 450, y: 760, angle: 0, cat: null},
+    {x: 600, y: 880, angle: 73, cat: null},
 
-    {x: 800, y: 480, angle: 0, occupied: false},
+    {x: 800, y: 480, angle: 0, cat: null},
 
-    {x: 1820, y: 835, angle: 0, occupied: false},
-    {x: 2030, y: 835, angle: 0, occupied: false},
-    {x: 2240, y: 835, angle: 0, occupied: false},
+    {x: 1820, y: 835, angle: 0, cat: null},
+    {x: 2030, y: 835, angle: 0, cat: null},
+    {x: 2240, y: 835, angle: 0, cat: null},
 
-    {x: 2150, y: 490, angle: -68, occupied: false},
+    {x: 2150, y: 490, angle: -68, cat: null},
 ];
 
 let width = 2560; // TODO
@@ -79,18 +77,10 @@ class Cat {
         this.pattedTime = 0;
         this.pattedFrame = 0;
 
-        let slot = Math.floor(Math.random() * SLOTS.length);
-        while (SLOTS[slot].occupied) {
-            slot = Math.floor(Math.random() * SLOTS.length);
-        }
-        this.slot = SLOTS[slot];
-        this.slot.occupied = true;
-        this.slotIndex = slot;
-        currentCats.push(this);
-        console.log(`Create cat ${this.slotIndex}`);
+        console.log(`Create cat`);
     };
 
-    update(time) {
+    update(time, slot) {
         if (this.entering && !this.patted) {
             this.level = Math.min(this.level + 0.1, 1.0);
             if (this.level >= 0.999) {
@@ -112,34 +102,20 @@ class Cat {
                 this.pattedTime = time;
                 this.pattedFrame += 1
             } else if (time - this.pattedTime > PAT_FRAME_LENGTH && this.pattedFrame === 5) {
-                for (let i = 0; i < currentCats.length; i++) {
-                    if (currentCats[i].slotIndex === this.slotIndex) {
-                        currentCats.splice(i, 1);
-                        console.log(`Remove cat ${this.slotIndex}`);
-                        break;
-                    }
-                }
+                slot.cat = null;
             }
         }
 
         if (this.leaving && !this.patted) {
             this.level = Math.max(this.level - 0.1, 0.0);
             if (this.level <= 0.001) {
-                // TODO: DELETE
-                for (let i = 0; i < currentCats.length; i++) {
-                    if (currentCats[i].slotIndex === this.slotIndex) {
-                        currentCats.splice(i, 1);
-                        this.slot.occupied = false;
-                        console.log(`Remove cat ${this.slotIndex}`);
-                        break;
-                    }
-                }
+                slot.cat = null;
             }
         }
     }
 
-    draw() {
-        drawCatInSlot(this.cat, this.slot, this.level, this.pattedFrame);
+    draw(slot) {
+        drawCatInSlot(this.cat, slot, this.level, this.pattedFrame);
     }
 }
 
@@ -204,10 +180,18 @@ let lastCat = 0;
 const update = (time) => {
     // Cats
 
-    currentCats.forEach(c => c.update(time));
+    const emptySlots = SLOTS.filter(s => s.cat == null);
+    const catCount = SLOTS.length - emptySlots.length;
 
-    if (time - lastCat >= CAT_INTERVAL && currentCats.length < 3) {
-        new Cat(time);
+    SLOTS.forEach(s => {
+        if (s.cat) {
+            s.cat.update(time, s.cat)
+        }
+    });
+
+    if (time - lastCat >= CAT_INTERVAL && catCount.length < 3 && emptySlots.length > 0) {
+        const slot = emptySlots[Math.floor(Math.random() * emptySlots.length)];
+        slot.cat = new Cat(time);
         lastCat = time;
     }
 
@@ -287,15 +271,18 @@ const update = (time) => {
             player2.damagedX = player1.x;
             player2.damagedY = player1.y;
         } else {
-            currentCats.forEach(c => {
-                if (Math.pow(c.slot.x - (player1.x + 30), 2)
-                    + Math.pow(c.slot.y - (player1.y - 80), 2) <= 40000) {
-                    if (!c.patted) {
-                        c.patted = true;
-                        if (c.cat.name === "fake") {
-                            player1.addScore(-30);
-                        } else {
-                            player1.addScore(10);
+            SLOTS.forEach(s => {
+                if (s.cat) {
+                    const c = s.cat;
+                    if (Math.pow(s.x - (player1.x + 30), 2)
+                        + Math.pow(s.y - (player1.y - 80), 2) <= 40000) {
+                        if (!c.patted) {
+                            c.patted = true;
+                            if (c.cat.name === "fake") {
+                                player1.addScore(-30);
+                            } else {
+                                player1.addScore(10);
+                            }
                         }
                     }
                 }
@@ -317,15 +304,18 @@ const update = (time) => {
             player1.damagedX = player1.x;
             player1.damagedY = player1.y;
         } else {
-            currentCats.forEach(c => {
-                if (Math.pow(c.slot.x - (player2.x + 30), 2)
-                    + Math.pow(c.slot.y - (player2.y - 80), 2) <= 40000) {
-                    if (!c.patted) {
-                        c.patted = true;
-                        if (c.cat.name === "fake") {
-                            player2.addScore(-30);
-                        } else {
-                            player2.addScore(10);
+            SLOTS.forEach(s => {
+                if (s.cat) {
+                    const c = s.cat;
+                    if (Math.pow(s.x - (player1.x + 30), 2)
+                        + Math.pow(s.y - (player1.y - 80), 2) <= 40000) {
+                        if (!c.patted) {
+                            c.patted = true;
+                            if (c.cat.name === "fake") {
+                                player1.addScore(-30);
+                            } else {
+                                player1.addScore(10);
+                            }
                         }
                     }
                 }
@@ -451,8 +441,11 @@ const draw = () => {
 
     // Draw Cats
 
-    currentCats.forEach(c => c.draw());
-
+    SLOTS.forEach(s => {
+        if (s.cat) {
+            s.cat.draw(s);
+        }
+    });
 
     // Draw Fore-Background
 
