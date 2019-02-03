@@ -5,6 +5,11 @@ for (let i = 1; i <= 24; i++) {
 	songs.push(`assets/songs/${i}.mp3`);
 }
 
+const meows = [];
+for (let i = 1; i <= 83; i++) {
+	meows.push(`assets/meows/${i}.m4a`);
+}
+
 let currentSong = 0;
 
 let canvas;
@@ -84,6 +89,9 @@ class Cat {
 			if (this.pattedTime === 0) {
 				this.pattedTime = time;
 				this.pattedFrame = 1;
+				let meow = new Audio(meows[Math.floor(Math.random() * meows.length)]);
+				meow.play();
+				console.log("meow");
 			} else if (time - this.pattedTime > PAT_FRAME_LENGTH && this.pattedFrame <= 4) {
 				this.pattedTime = time;
 				this.pattedFrame += 1
@@ -253,7 +261,6 @@ const update = (time) => {
 					+ Math.pow(c.slot.y - (player1.y - 80), 2) <= 40000) {
 					if (!c.patted) {
 						c.patted = true;
-						c.pattedTime = time;
 						player1.addScore(10);
 					}
 				}
@@ -274,7 +281,6 @@ const update = (time) => {
 					+ Math.pow(c.slot.y - (player2.y - 80), 2) <= 40000) {
 					if (!c.patted) {
 						c.patted = true;
-						c.pattedTime = time;
 						player2.addScore(10);
 					}
 				}
