@@ -260,8 +260,8 @@ const update = (time) => {
             changeSound();
         } else {
             currentCats.forEach(c => {
-                if (Math.pow(gs * c.slot.x - gs * (player1.x + 30), 2)
-                    + Math.pow(gs * c.slot.y - gs * (player1.y - 80), 2) <= 40000) {
+                if (Math.pow(c.slot.x - (player1.x + 30), 2)
+                    + Math.pow(c.slot.y - (player1.y - 80), 2) <= 40000) {
                     if (!c.patted) {
                         c.patted = true;
                         player1.addScore(10);
@@ -280,8 +280,8 @@ const update = (time) => {
             changeSound();
         } else {
             currentCats.forEach(c => {
-                if (Math.pow(gs * c.slot.x - gs * (player2.x + 30), 2)
-                    + Math.pow(gs * c.slot.y - gs * (player2.y - 80), 2) <= 40000) {
+                if (Math.pow(c.slot.x - (player2.x + 30), 2)
+                    + Math.pow(c.slot.y - (player2.y - 80), 2) <= 40000) {
                     if (!c.patted) {
                         c.patted = true;
                         player2.addScore(10);
@@ -442,7 +442,7 @@ const changeSound = () => {
     document.getElementById("beats").src = songs[randSong];
 };
 
-const computeScale= () => {
+const computeScale = () => {
     const w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
     const h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
