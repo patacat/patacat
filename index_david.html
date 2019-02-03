@@ -2,13 +2,25 @@
 <html lang="en">
 <head>
     <title>Pat-a-Cat</title>
-    <script src="js/patacat.js" defer></script>
-    <script src="js/main.js" defer></script>
+    <script src="js_david/main.js" defer></script>
 
     <style type="text/css">
         body {
             margin: 0;
             padding: 0;
+        }
+
+        h1 {
+            margin: 0;
+            padding: 0;
+
+            font-family: "CatPat", sans-serif;
+            position: fixed;
+            z-index: 99;
+            top: 30px;
+            left: 30px;
+
+            color: rgba(100, 50, 80, 0.5);
         }
 
         div#assets {
@@ -22,6 +34,12 @@
             width: 1280px;
             height: 675px;
         }
+
+        @font-face {
+            font-family: "CatPat";
+            src: url("assets/Myfont-Regular.ttf") format("truetype"),
+                 url("assets/Myfont-Regular.otf") format("otf");
+        }
     </style>
 </head>
 <body>
@@ -33,6 +51,11 @@
     <img src="assets/fakecat.png" id="cat-fake">
     <img src="assets/rockincat.png" id="cat-rockin">
     <img src="assets/sandwhichCat.png" id="cat-sandwich">
+
+    <img src="assets/poof1.png" id="poof1">
+    <img src="assets/poof2.png" id="poof2">
+    <img src="assets/poof3.png" id="poof3">
+    <img src="assets/poof4.png" id="poof4">
 
     <!-- PLAYERS -->
     <img src="assets/player1.png" id="player1">
@@ -53,6 +76,8 @@
     <img src="assets/fire3.png" id="fire3">
     <img src="assets/fire4.png" id="fire4">
 
+    <img src="assets/frame.png" id="frame">
+
     <img src="assets/pot.png" id="pot">
     <img src="assets/otherpot.png" id="other-pot">
 
@@ -61,6 +86,7 @@
     <img src="assets/couch.png" id="couch">
     <img src="assets/largeCouch.png" id="large-couch">
 </div>
+<h1>Pat-a-Cat</h1>
 <iframe src="assets/songs/1.mp3" allow="" style="display: none;" id="beats"></iframe>
 <canvas id="main-canvas" width="2560" height="1350"></canvas>
 </body>

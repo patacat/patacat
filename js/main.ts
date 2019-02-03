@@ -1,5 +1,12 @@
 // Globals
 
+const songs: any[] = [];
+for (let i = 1; i <= 24; i++) {
+    songs.push(`assets/songs/${i}.mp3`);
+}
+
+let currentSong = 0;
+
 let canvas;
 let ctx: CanvasRenderingContext2D;
 let assets = {};
@@ -9,12 +16,16 @@ let fireTime = 0;
 let fire = 1;
 
 const SLOTS = [
-    {x: 350, y: 760, angle: 0},
-    {x: 590, y: 780, angle: 73},
+    {x: 450, y: 760, angle: 0, occupied: false},
+    {x: 590, y: 880, angle: 73, occupied: false},
 
-    {x: 1720, y: 835, angle: 0},
-    {x: 1930, y: 835, angle: 0},
-    {x: 2140, y: 835, angle: 0},
+    {x: 780, y: 480, angle: 0, occupied: false},
+
+    {x: 1820, y: 835, angle: 0, occupied: false},
+    {x: 2030, y: 835, angle: 0, occupied: false},
+    {x: 2240, y: 835, angle: 0, occupied: false},
+
+    {x: 2210, y: 580, angle: -68, occupied: false},
 ];
 
 let width = 2560; // TODO
@@ -25,6 +36,12 @@ let height = 1350; // TODO
 
 
 // Players
+
+const globalConfigs = {
+    currentCats: [],
+    width: width,
+    height: height
+};
 
 const player1 = new Player({
     tag: '1',
@@ -37,9 +54,7 @@ const player1 = new Player({
     keyDown: 's',
     keyPat: 'e',
 
-    width: width,
-    height: height
-});
+}, globalConfigs);
 
 const player2 = new Player({
     tag: '2',
@@ -52,9 +67,7 @@ const player2 = new Player({
     keyDown: 'k',
     keyPat: 'o',
 
-    width: width,
-    height: height
-});
+}, globalConfigs);
 
 // Test
 const player3 = new Player({
@@ -68,13 +81,107 @@ const player3 = new Player({
     keyDown: 'h',
     keyPat: 'y',
 
-    width: width,
-    height: height
-});
+}, globalConfigs);
+
+const CAT_INTERVAL = 1000;
+
+let lastCat = 0;
+
+
+const CAT_LENGTH = 2000;
+
+const PAT_FRAME_LENGTH = 100;
 
 const players = [player1, player2];
 
+class Cat {
+    constructor(time) {
+        this.cat = cats[Math.floor(Math.random() * cats.length)];
+
+        this.initialTime = time;
+
+        let slot = Math.floor(Math.random() * SLOTS.length);
+        while (SLOTS[slot].occupied) {
+            slot = Math.floor(Math.random() * SLOTS.length);
+        }
+        this.slot = SLOTS[slot];
+        this.slot.occupied = true;
+
+        globalConfigs.currentCats.push(this);
+    };
+
+    cat: any;
+    entering = true;
+    leaving = false;
+    patted = false;
+    level = 0;
+    pattedTime = 0;
+    pattedFrame = 0;
+    initialTime: number;
+    slot: any;
+
+    update(time) {
+        if (this.entering && !this.patted) {
+            this.level = Math.min(this.level + 0.1, 1.0);
+            if (this.level >= 0.999) {
+                this.entering = false;
+            }
+        }
+
+        if (time - this.initialTime > CAT_LENGTH && !this.patted) {
+            this.leaving = true;
+        }
+
+        if (this.patted) {
+            if (this.pattedTime === 0) {
+                this.pattedTime = time;
+                this.pattedFrame = 1;
+            } else if (time - this.pattedTime > PAT_FRAME_LENGTH && this.pattedFrame <= 4) {
+                this.pattedTime = time;
+                this.pattedFrame += 1
+            } else if (time - this.pattedTime > PAT_FRAME_LENGTH && this.pattedFrame === 5) {
+                for (let c in globalConfigs.currentCats) {
+                    if (!globalConfigs.currentCats.hasOwnProperty(c)) continue;
+                    if (globalConfigs.currentCats[c] === this) {
+                        this.slot.occupied = false;
+                        // @ts-ignore
+                        globalConfigs.currentCats.splice(c, 1);
+                    }
+                }
+            }
+        }
+
+        if (this.leaving && !this.patted) {
+            this.level = Math.max(this.level - 0.1, 0.0);
+            if (this.level <= 0.001) {
+                // TODO: DELETE
+                for (let c in globalConfigs.currentCats) {
+                    if (!globalConfigs.currentCats.hasOwnProperty(c)) continue;
+                    if (globalConfigs.currentCats[c] === this) {
+                        this.slot.occupied = false;
+                        // @ts-ignore
+                        globalConfigs.currentCats.splice(c, 1);
+                    }
+                }
+            }
+        }
+    }
+
+    draw() {
+        drawCatInSlot(this.cat, this.slot, this.level, this.pattedFrame);
+    }
+}
+
 const update = (time: number) => {
+
+    globalConfigs.currentCats.forEach(c => c.update(time));
+
+    if (time - lastCat >= CAT_INTERVAL && globalConfigs.currentCats.length < 3) {
+        new Cat(time);
+        console.log('Create new cat');
+        lastCat = time;
+    }
+
     players.forEach(p => p.update());
     if (time - fireTime > 250) {
         fireTime = time;
@@ -84,10 +191,14 @@ const update = (time: number) => {
     }
 };
 
-const drawCatInSlot = (cat, slot, fraction) => {
+const drawCatInSlot = (cat, slot, fraction, pattedFrame) => {
     ctx.translate(slot.x, slot.y);
     ctx.rotate(slot.angle * Math.PI / 180);
-    ctx.drawImage(cat.asset["img"], 0, -cat.draw_height + (cat.draw_height * (1 - fraction)), 200, cat.draw_height);
+    if (pattedFrame === 0) {
+        ctx.drawImage(cat.asset["img"], -100, -cat.draw_height + (cat.draw_height * (1 - fraction)), 200, cat.draw_height);
+    } else if (pattedFrame < 5) {
+        ctx.drawImage(assets["poof" + pattedFrame.toString()]["img"], -80, -100 + (80 * (1 - fraction)), 160, 160);
+    }
     // ctx.drawImage(assets["couch"]["img"], 0, -cat.draw_height + (cat.draw_height * (1 - fraction)), 200, cat.draw_height);
     ctx.rotate(-slot.angle * Math.PI / 180);
     ctx.translate(-slot.x, -slot.y);
@@ -97,10 +208,11 @@ const getCatPat = (slot, fraction) => {
 
 };
 
-const draw = () => {
+const draw = (time) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.drawImage(assets["wallpaper"]["img"], 0, 0, 2883, 1350);
+    ctx.drawImage(assets["floor"]["img"], -30, height - 340, 3101, 400);
 
     ctx.drawImage(assets["fireplace"]["img"], 630, -20, 832, 1160);
 
@@ -109,12 +221,7 @@ const draw = () => {
 
     // Draw Cats
 
-    drawCatInSlot(cats[0], SLOTS[0], 1);
-    drawCatInSlot(cats[0], SLOTS[1], 1);
-    drawCatInSlot(cats[0], SLOTS[2], 0.6);
-    drawCatInSlot(cats[0], SLOTS[3], 0.8);
-    drawCatInSlot(cats[0], SLOTS[4], 1.0);
-
+    globalConfigs.currentCats.forEach(c => c.draw());
 
     // Draw Fore-Background
 
@@ -124,6 +231,8 @@ const draw = () => {
 
     ctx.drawImage(assets["pot"]["img"], 1200, 468, 202, 150);
     ctx.drawImage(assets["other-pot"]["img"], 680, 395, 240, 222);
+
+    ctx.drawImage(assets["lamp"]["img"], 2090, 300, 270, 900);
 
     ctx.drawImage(assets["plant"]["img"], 20, 680, 245, 500);
 
@@ -139,10 +248,20 @@ const gameLoop = () => {
     const time = (new Date).getTime();
 
     update(time);
-    draw();
+    draw(time);
 
     window.requestAnimationFrame(gameLoop);
 };
+
+const changeSound = () => {
+    // let randSong = Math.floor(Math.random() * songs.length);
+    // while (randSong === currentSong) {
+    //     randSong = Math.floor(Math.random() * songs.length);
+    // }
+    //
+    // document.getElementById("beats").src = songs[randSong];
+};
+
 
 
 // Initialize!
@@ -173,6 +292,10 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("keydown", e => {
         players.forEach(p => p.onKeyDown(e.key));
     });
+
+    document.getElementById("beats")!.addEventListener("ended", changeSound);
+
+    changeSound();
 
     gameLoop();
 });

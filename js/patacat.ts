@@ -17,13 +17,17 @@ type PlayerConfig = {
     tag: string
     x: number
     y: number
-    width: number
-    height: number
     keyUp: string,
     keyLeft: string,
     keyRight: string,
     keyDown: string,
     keyPat: string
+}
+
+type GlobalConfigs = {
+    currentCats: any[]
+    width: number
+    height: number
 }
 
 
@@ -32,13 +36,15 @@ const ACCEL = 1;
 
 class Player {
 
-    constructor(configs: PlayerConfig) {
+    constructor(configs: PlayerConfig, globalConfigs: GlobalConfigs) {
         this.configs = configs;
+        this.global = globalConfigs;
         this.x = configs.x;
         this.y = configs.y;
     }
 
     configs: PlayerConfig;
+    global: GlobalConfigs;
     x: number;
     y: number;
     v: number = 0;
@@ -79,6 +85,17 @@ class Player {
         // Update patting
         if (!this.patting && this.actions.patting) {
             this.patting = true;
+            if (this.x + 30 >= 930 && this.x + 30 <= 930 + 250
+                && this.y - 80 >= 478 && this.y - 80 <= 478 + 164) {
+                this.changeSound();
+            } else {
+                this.global.currentCats.forEach(c => {
+                    if (Math.pow(c.slot.x - (this.x + 30), 2)
+                        + Math.pow(c.slot.y - (this.y - 80), 2) <= 40000) {
+                        console.log("pat", c);
+                    }
+                });
+            }
         } else if (this.patting && !this.actions.patting) {
             this.patting = false;
         }
@@ -87,7 +104,7 @@ class Player {
         this.x += Math.cos(this.dir) * this.v;
         this.y -= Math.sin(this.dir) * this.v;
 
-        if (this.x < 100 || this.y < 100 || this.x > this.configs.width - 100 || this.y > this.configs.height - 100) {
+        if (this.x < 100 || this.y < 100 || this.x > this.global.width - 100 || this.y > this.global.height - 100) {
             this.actions.reset();
             this.dir = this.dir - Math.PI;
         }
@@ -95,11 +112,15 @@ class Player {
         this.fitWithinBounds(100);
     }
 
+    changeSound(): void {
+        // TODO
+    }
+
     fitWithinBounds(padding: number) {
         if (this.x < padding) this.x = padding;
         if (this.y < padding) this.y = padding;
-        if (this.x > this.configs.width - padding) this.x = this.configs.width - 100;
-        if (this.y > this.configs.height - padding) this.y = this.configs.height - 100;
+        if (this.x > this.global.width - padding) this.x = this.global.width - 100;
+        if (this.y > this.global.height - padding) this.y = this.global.height - 100;
     }
 
     onKeyDown(key: string): void {
