@@ -28,7 +28,7 @@ var Player = /** @class */ (function () {
         this.x = configs.x;
         this.y = configs.y;
     }
-    Player.prototype.update = function (time) {
+    Player.prototype.update = function () {
         if (this.actions.up && !this.actions.left && !this.actions.right && !this.actions.down) {
             this.v = Math.min(this.v + ACCEL, MAX_V);
             this.dir = 90 * Math.PI / 180;
@@ -109,6 +109,11 @@ var Player = /** @class */ (function () {
             }
             case this.configs.keyDown: {
                 this.actions.down = true;
+                break;
+            }
+            case this.configs.keyPat: {
+                this.actions.patting = true;
+                break;
             }
         }
     };
@@ -128,12 +133,17 @@ var Player = /** @class */ (function () {
             }
             case this.configs.keyDown: {
                 this.actions.down = false;
+                break;
+            }
+            case this.configs.keyPat: {
+                this.actions.patting = false;
+                break;
             }
         }
     };
     Player.prototype.draw = function (ctx, assets) {
         if (this.patting) {
-            ctx.drawImage(assets["player" + this.configs.tag + (this.damaged ? "-damaged" : "")]["img"], this.x - 100, this.y - 100, 200, 200);
+            ctx.drawImage(assets["player" + this.configs.tag + (this.damaged ? "-damaged" : "")]["img"], player1.x - 85, player1.y - 85, 170, 170);
         }
         else {
             ctx.drawImage(assets["player" + this.configs.tag + (this.damaged ? "-damaged" : "")]["img"], this.x - 100, this.y - 100, 200, 200);

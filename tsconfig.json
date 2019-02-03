@@ -14,7 +14,7 @@
     //    "noEmit": true,
     // Extras
     "strictNullChecks": true,
-//    "noImplicitAny": true,
+    "noImplicitAny": false,
     "allowUnreachableCode": true,
     "allowUnusedLabels": true
   },

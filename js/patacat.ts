@@ -47,7 +47,7 @@ class Player {
     patting: boolean = false;
     actions: Actions = new Actions();
 
-    update(time: number): void {
+    update(): void {
         if (this.actions.up && !this.actions.left && !this.actions.right && !this.actions.down) {
             this.v = Math.min(this.v + ACCEL, MAX_V);
             this.dir = 90 * Math.PI / 180;
@@ -76,7 +76,6 @@ class Player {
             if (this.v < 0.01) this.v = 0;
             else this.v *= 0.8;
         }
-
         // Update patting
         if (!this.patting && this.actions.patting) {
             this.patting = true;
@@ -119,6 +118,11 @@ class Player {
             }
             case this.configs.keyDown: {
                 this.actions.down = true;
+                break;
+            }
+            case this.configs.keyPat: {
+                this.actions.patting = true;
+                break;
             }
         }
     }
@@ -139,14 +143,19 @@ class Player {
             }
             case this.configs.keyDown: {
                 this.actions.down = false;
+                break;
+            }
+            case this.configs.keyPat: {
+                this.actions.patting = false;
+                break;
             }
         }
     }
 
-    draw(ctx: CanvasDrawImage, assets: any): void {
+    draw(ctx: CanvasRenderingContext2D, assets: any): void {
         if (this.patting) {
             ctx.drawImage(assets[`player${this.configs.tag}` + (this.damaged ? "-damaged" : "")]["img"],
-                this.x - 100, this.y - 100, 200, 200);
+                player1.x - 85, player1.y - 85, 170, 170);
         } else {
             ctx.drawImage(assets[`player${this.configs.tag}` + (this.damaged ? "-damaged" : "")]["img"],
                 this.x - 100, this.y - 100, 200, 200);
