@@ -110,7 +110,6 @@ class Cat {
                 this.pattedTime = time;
                 this.pattedFrame += 1
             } else if (time - this.pattedTime > PAT_FRAME_LENGTH && this.pattedFrame === 5) {
-                this.slot.occupied = false;
                 for (let i = 0; i < currentCats.length; i++) {
                     if (currentCats[i].slotIndex === this.slotIndex) {
                         currentCats.splice(i, 1);
