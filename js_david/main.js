@@ -84,6 +84,7 @@ class Cat {
         this.slot.occupied = true;
         this.slotIndex = slot;
         currentCats.push(this);
+        console.log(`Create cat ${this.slotIndex}`);
     };
 
     update(time) {
@@ -96,7 +97,6 @@ class Cat {
 
         if (time - this.initialTime > CAT_LENGTH && !this.patted) {
             this.leaving = true;
-            console.log('Cat leaving');
         }
 
         if (this.patted) {
@@ -113,7 +113,7 @@ class Cat {
                 for (let i = 0; i < currentCats.length; i++) {
                     if (currentCats[i].slotIndex === this.slotIndex) {
                         currentCats.splice(i, 1);
-                        this.slot.occupied = false;
+                        console.log(`Remove cat ${this.slotIndex}`);
                         break;
                     }
                 }
@@ -128,6 +128,7 @@ class Cat {
                     if (currentCats[i].slotIndex === this.slotIndex) {
                         currentCats.splice(i, 1);
                         this.slot.occupied = false;
+                        console.log(`Remove cat ${this.slotIndex}`);
                         break;
                     }
                 }
@@ -197,7 +198,6 @@ const update = (time) => {
 
     if (time - lastCat >= CAT_INTERVAL && currentCats.length < 3) {
         new Cat(time);
-        console.log('Create new cat');
         lastCat = time;
     }
 
