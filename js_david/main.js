@@ -446,7 +446,7 @@ const computeScale= () => {
     const w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
     const h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
-    gs = Math.max(w / width, h / height);
+    gs = Math.min(w / width, h / height);
     if (gs === 0) {
         gs = 1;
     }
