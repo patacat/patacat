@@ -344,9 +344,9 @@ const drawCatInSlot = (cat, slot, fraction, pattedFrame) => {
     ctx.translate(slot.x, slot.y);
     ctx.rotate(slot.angle * Math.PI / 180);
     if (pattedFrame === 0) {
-        ctx.drawImage(cat.asset["img"], -100, -cat.draw_height + (cat.draw_height * (1 - fraction)), 200, cat.draw_height);
+        ctx.drawImage(cat.asset["img"], gs * -100, gs * (-cat.draw_height + (cat.draw_height * (1 - fraction))), gs * 200, gs * cat.draw_height);
     } else if (pattedFrame < 5) {
-        ctx.drawImage(assets["poof" + pattedFrame.toString()]["img"], -80, -100 - (10 * pattedFrame) + (80 * (1 - fraction)), 160, 160);
+        ctx.drawImage(assets["poof" + pattedFrame.toString()]["img"], gs * -80, gs * (-100 - (10 * pattedFrame) + (80 * (1 - fraction))), gs * 160, gs * 160);
     }
     // ctx.drawImage(assets["couch"]["img"], 0, -cat.draw_height + (cat.draw_height * (1 - fraction)), 200, cat.draw_height);
     ctx.rotate(-slot.angle * Math.PI / 180);
@@ -487,7 +487,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (k.substr(0, 4) === "cat-") {
             cats.push({
                 asset: assets[k],
-                draw_height: gs * 200 * (assets[k]["h"] / assets[k]["w"])
+                draw_height: 200 * (assets[k]["h"] / assets[k]["w"])
             });
         }
     }
