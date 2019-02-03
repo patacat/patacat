@@ -209,7 +209,7 @@ const CAT_INTERVAL = 1000;
 
 let lastCat = 0;
 
-const MAX_CATS = 3;
+const MAX_CATS = 4;
 
 let lastFireCat = 0;
 const FIRE_CAT_INTERVAL = 12000;
