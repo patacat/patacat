@@ -85,9 +85,8 @@ class Cat {
         }
         this.slot = SLOTS[slot];
         this.slot.occupied = true;
-        this.slotIndex = slot;
         currentCats.push(this);
-        console.log(`Create cat ${this.slotIndex}`);
+        console.log(`Create cat`);
     };
 
     update(time) {
@@ -112,11 +111,11 @@ class Cat {
                 this.pattedTime = time;
                 this.pattedFrame += 1
             } else if (time - this.pattedTime > PAT_FRAME_LENGTH && this.pattedFrame === 5) {
-                for (let i = 0; i < currentCats.length; i++) {
-                    if (currentCats[i].slotIndex === this.slotIndex) {
-                        currentCats.splice(i, 1);
-                        console.log(`Remove cat ${this.slotIndex}`);
-                        break;
+                for (let c in currentCats) {
+                    if (!currentCats.hasOwnProperty(c)) continue;
+                    if (currentCats[c] === this) {
+                        this.slot.occupied = false;
+                        currentCats.splice(c, 1);
                     }
                 }
             }
@@ -126,12 +125,11 @@ class Cat {
             this.level = Math.max(this.level - 0.1, 0.0);
             if (this.level <= 0.001) {
                 // TODO: DELETE
-                for (let i = 0; i < currentCats.length; i++) {
-                    if (currentCats[i].slotIndex === this.slotIndex) {
-                        currentCats.splice(i, 1);
+                for (let c in currentCats) {
+                    if (!currentCats.hasOwnProperty(c)) continue;
+                    if (currentCats[c] === this) {
                         this.slot.occupied = false;
-                        console.log(`Remove cat ${this.slotIndex}`);
-                        break;
+                        currentCats.splice(c, 1);
                     }
                 }
             }
