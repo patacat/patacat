@@ -5,6 +5,11 @@ for (let i = 1; i <= 24; i++) {
 	songs.push(`assets/songs/${i}.mp3`);
 }
 
+const meows = [];
+for (let i = 1; i <= 83; i++) {
+	meows.push(`assets/meows/${i}.m4a`);
+}
+
 let currentSong = 0;
 
 let canvas;
@@ -17,7 +22,12 @@ let fireTime = 0;
 let fire = 1;
 let back = 1;
 
+const RANDOM_ART = 1 + Math.floor(Math.random() * 4);
+
 let currentCats = [];
+
+let player1ScoreEl;
+let player2ScoreEl;
 
 const SLOTS = [
 	{x: 450, y: 760, angle: 0, occupied: false},
@@ -81,6 +91,9 @@ class Cat {
 			if (this.pattedTime === 0) {
 				this.pattedTime = time;
 				this.pattedFrame = 1;
+				let meow = new Audio(meows[Math.floor(Math.random() * meows.length)]);
+				meow.play();
+				console.log("meow");
 			} else if (time - this.pattedTime > PAT_FRAME_LENGTH && this.pattedFrame <= 4) {
 				this.pattedTime = time;
 				this.pattedFrame += 1
@@ -126,7 +139,14 @@ const player1 = {
 	patting: false,
 
 	v: 0,
-	dir: 0
+	dir: 0,
+
+	score: 0,
+
+	addScore: function (s) {
+		this.score += s;
+		player1ScoreEl.innerHTML = this.score.toFixed();
+	}
 };
 
 const player2 = {
@@ -137,7 +157,14 @@ const player2 = {
 	patting: false,
 
 	v: 0,
-	dir: 0
+	dir: 0,
+
+	score: 0,
+
+	addScore: function (s) {
+		this.score += s;
+		player2ScoreEl.innerHTML = this.score.toFixed();
+	}
 };
 
 
@@ -236,8 +263,7 @@ const update = (time) => {
 					+ Math.pow(c.slot.y - (player1.y - 80), 2) <= 40000) {
 					if (!c.patted) {
 						c.patted = true;
-						c.pattedTime = time;
-						console.log("pat", c);
+						player1.addScore(10);
 					}
 				}
 			});
@@ -257,7 +283,7 @@ const update = (time) => {
 					+ Math.pow(c.slot.y - (player2.y - 80), 2) <= 40000) {
 					if (!c.patted) {
 						c.patted = true;
-						c.pattedTime = time;
+						player2.addScore(10);
 					}
 				}
 			});
@@ -307,6 +333,7 @@ const update = (time) => {
 		const oldFire = fire;
 		while (fire === oldFire) fire = Math.round(1 + Math.random() * 3);
 
+		// noinspection UnnecessaryLocalVariableJS
 		const oldBack = back;
 		while (back === oldBack) back = Math.round(1 + Math.random() * 3);
 	}
@@ -335,7 +362,7 @@ const draw = () => {
 	ctx.drawImage(assets["back" + back.toString()]["img"], 883, 866, 330, 263);
 	ctx.drawImage(assets["fireplace"]["img"], 630, -20, 832, 1160);
 
-	ctx.drawImage(assets["art1"]["img"], 1690, 260, 480, 337);
+	ctx.drawImage(assets["art" + RANDOM_ART.toString()]["img"], 1690, 260, 480, 337);
 	ctx.drawImage(assets["frame"]["img"], 1630, 170, 600, 524);
 
 
@@ -386,6 +413,12 @@ const draw = () => {
 
 	// ctx.drawImage(assets["fire1" + (player2.damaged ? "-damaged" : "")]["img"],
 	// 	player2.x - 60, player2.y - 80, 20, 20);
+
+
+	// Scoring
+
+	ctx.drawImage(assets["coin"]["img"], width - 950, 50, 100, 100);
+	ctx.drawImage(assets["coin"]["img"], width - 500, 50, 100, 100);
 };
 
 
@@ -430,6 +463,9 @@ document.addEventListener("DOMContentLoaded", () => {
 			});
 		}
 	}
+
+	player1ScoreEl = document.getElementById("player1-score-value");
+	player2ScoreEl = document.getElementById("player2-score-value");
 
 	window.addEventListener("keyup", e => {
 		keys[e.key] = false;
