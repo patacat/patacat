@@ -468,10 +468,10 @@ const computeScale = () => {
     // Reposition scores
     const score1 = document.getElementById('player1-score');
     score1.style.left = `${gs / scale * (width - 950 + 120)}px`;
-    score1.style.top = `${gs / scale * 50 + score1.offsetHeight / scale}px`;
+    score1.style.top = `${gs / scale * 50 + score1.offsetHeight * gs / scale}px`;
     const score2 = document.getElementById('player2-score');
     score2.style.left = `${gs / scale * (width - 500 + 120)}px`;
-    score2.style.top = `${gs / scale * 50 + score1.offsetHeight / scale}px`;
+    score2.style.top = `${gs / scale * 50 + score1.offsetHeight * gs / scale}px`;
 };
 
 
