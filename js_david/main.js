@@ -115,6 +115,20 @@ const update = () => {
 
 	player2.x += Math.cos(player2.dir) * player2.v;
 	player2.y -= Math.sin(player2.dir) * player2.v;
+
+	if (player1.x < 100 || player1.y < 100 || player1.x > width - 100 || player1.y > height - 100
+		|| player2.x < 100 || player2.y < 100 || player2.x > width - 100 || player2.y > height - 100) {
+		for (let k in keys) {
+			if (!keys.hasOwnProperty(k)) continue;
+			keys[k] = false;
+		}
+		player1.dir = player1.dir - Math.PI;
+	}
+
+	if (player1.x < 100) player1.x = 100;
+	if (player1.y < 100) player1.y = 100;
+	if (player1.y > 100) player1.y = 100;
+	if (player1.y > 100) player1.y = 100;
 };
 
 const drawCatInSlot = (cat, slot, fraction) => {
