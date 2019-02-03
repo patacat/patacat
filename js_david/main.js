@@ -10,9 +10,9 @@ const SLOTS = [
 	{x: 350, y: 760, angle: 0},
 	{x: 590, y: 780, angle: 73},
 
-	{x: 1720, y: 825, angle: 0},
-	{x: 1930, y: 825, angle: 0},
-	{x: 2140, y: 825, angle: 0},
+	{x: 1720, y: 835, angle: 0},
+	{x: 1930, y: 835, angle: 0},
+	{x: 2140, y: 835, angle: 0},
 ];
 
 let width = 2560; // TODO
@@ -117,10 +117,10 @@ const update = () => {
 	player2.y -= Math.sin(player2.dir) * player2.v;
 };
 
-const drawCatInSlot = (cat, slot) => {
+const drawCatInSlot = (cat, slot, fraction) => {
 	ctx.translate(slot.x, slot.y);
 	ctx.rotate(slot.angle * Math.PI / 180);
-	ctx.drawImage(cat.asset["img"], 0, -cat.draw_height, 200, cat.draw_height);
+	ctx.drawImage(cat.asset["img"], 0, -cat.draw_height + (cat.draw_height * (1 - fraction)), 200, cat.draw_height);
 	ctx.rotate(-slot.angle * Math.PI / 180);
 	ctx.translate(-slot.x, -slot.y);
 };
@@ -128,31 +128,21 @@ const drawCatInSlot = (cat, slot) => {
 const draw = () => {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-	// Temp Cats
-	// ctx.drawImage(assets["cat-rockin"]["img"], 1720, 825 - 179, 200, 179);
-	// ctx.drawImage(assets["cat-alvin"]["img"], 1920, 825 - 101, 200, 101);
-	// ctx.drawImage(assets["cat-sandwich"]["img"], 2140, 825 - 142, 200, 142);
-	//
-	// ctx.drawImage(assets["cat-fake"]["img"], 350, 770 - 154, 200, 154);
-	//
-	// ctx.translate(700, 870 - 117);
-	// ctx.rotate(70 * Math.PI/180);
-	// ctx.drawImage(assets["cat-cute"]["img"], 0, 0, 200, 117);
-	// ctx.rotate(-70 * Math.PI/180);
-	// ctx.translate(-700, -(870 - 117));
 
-	drawCatInSlot(cats[0], SLOTS[0]);
-	drawCatInSlot(cats[3], SLOTS[1]);
-	drawCatInSlot(cats[0], SLOTS[2]);
-	drawCatInSlot(cats[0], SLOTS[3]);
-	drawCatInSlot(cats[0], SLOTS[4]);
+	// Draw Cats
+
+	drawCatInSlot(cats[0], SLOTS[0], 0);
+	drawCatInSlot(cats[3], SLOTS[1], 0);
+	drawCatInSlot(cats[0], SLOTS[2], 0.6);
+	drawCatInSlot(cats[0], SLOTS[3], 0.8);
+	drawCatInSlot(cats[0], SLOTS[4], 1.0);
 
 
-	// Draw Background
+	// Draw Fore-Background
 	ctx.drawImage(assets["plant"]["img"], 20, 680, 245, 500);
 
 	ctx.drawImage(assets["couch"]["img"], 200, 730, 508, 450);
-	ctx.drawImage(assets["large-couch"]["img"], 1400, 800, 1000, 366);
+	ctx.drawImage(assets["large-couch"]["img"], 1400, 820, 1000, 366);
 
 
 	// Player 1
