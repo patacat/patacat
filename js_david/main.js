@@ -1,5 +1,12 @@
 // Globals
 
+const songs = [];
+for (let i = 1; i <= 24; i++) {
+	songs.push(`assets/songs/${i}.mp3`);
+}
+
+let currentSong = 0;
+
 let canvas;
 let ctx;
 let assets = {};
@@ -9,20 +16,78 @@ let keys = {};
 let fireTime = 0;
 let fire = 1;
 
-const SLOTS = [
-	{x: 350, y: 760, angle: 0},
-	{x: 590, y: 780, angle: 73},
+let currentCats = [];
 
-	{x: 1720, y: 835, angle: 0},
-	{x: 1930, y: 835, angle: 0},
-	{x: 2140, y: 835, angle: 0},
+const SLOTS = [
+	{x: 450, y: 760, angle: 0, occupied: false},
+	{x: 590, y: 880, angle: 73, occupied: false},
+
+	{x: 780, y: 480, angle: 0, occupied: false},
+
+	{x: 1820, y: 835, angle: 0, occupied: false},
+	{x: 2030, y: 835, angle: 0, occupied: false},
+	{x: 2240, y: 835, angle: 0, occupied: false},
+
+	{x: 2210, y: 580, angle: -68, occupied: false},
 ];
 
 let width = 2560; // TODO
 let height = 1350; // TODO
 
 
-// Helpers
+const CAT_LENGTH = 2000;
+
+
+class Cat {
+	constructor(time) {
+		this.entering = true;
+		this.leaving = false;
+		this.level = 0;
+		this.cat = cats[Math.floor(Math.random() * cats.length)];
+
+		this.initialTime = time;
+
+		let slot = Math.floor(Math.random() * SLOTS.length);
+		while (SLOTS[slot].occupied) {
+			slot = Math.floor(Math.random() * SLOTS.length);
+		}
+		this.slot = SLOTS[slot];
+		this.slot.occupied = true;
+
+		currentCats.push(this);
+	};
+
+	update(time) {
+		if (this.entering) {
+			this.level = Math.min(this.level + 0.1, 1.0);
+			if (this.level >= 0.999) {
+				this.entering = false;
+			}
+		}
+
+		if (time - this.initialTime > CAT_LENGTH) {
+			this.leaving = true;
+		}
+
+		if (this.leaving) {
+			this.level = Math.max(this.level - 0.1, 0.0);
+			if (this.level <= 0.001) {
+				// TODO: DELETE
+				for (let c in currentCats) {
+					if (!currentCats.hasOwnProperty(c)) continue;
+					if (currentCats[c] === this) {
+						this.slot.occupied = false;
+						currentCats.splice(c, 1);
+					}
+				}
+			}
+		}
+	}
+
+	draw() {
+		drawCatInSlot(this.cat, this.slot, this.level);
+	}
+}
 
 
 // Players
@@ -54,7 +119,25 @@ const MAX_V = 20;
 const ACCEL = 1;
 
 
+const CAT_INTERVAL = 1000;
+
+
+let lastCat = 0;
+
+
 const update = (time) => {
+	// Cats
+
+	currentCats.forEach(c => c.update(time));
+
+	if (time - lastCat >= CAT_INTERVAL && currentCats.length < 3) {
+		new Cat(time);
+		lastCat = time;
+	}
+
+
+	// Controls
+
 	if (keys["i"] && !keys["j"] && !keys["l"] && !keys["k"]) {
 		player2.v = Math.min(player2.v + ACCEL, MAX_V);
 		player2.dir = 90 * Math.PI / 180;
@@ -118,6 +201,18 @@ const update = (time) => {
 
 	if (!player1.patting && keys["e"]) {
 		player1.patting = true;
+		if (player1.x + 30 >= 930 && player1.x + 30 <= 930 + 250
+			&& player1.y - 80 >= 478 && player1.y - 80 <= 478 + 164) {
+			changeSound();
+		} else {
+			currentCats.forEach(c => {
+				if (Math.pow(c.slot.x - (player1.x + 30), 2)
+					+ Math.pow(c.slot.y - (player1.y - 80), 2) <= 40000) {
+					console.log("pat", c);
+				}
+			});
+		}
+
 	} else if (player1.patting && !keys["e"]) {
 		player1.patting = false;
 	}
@@ -174,33 +269,28 @@ const update = (time) => {
 const drawCatInSlot = (cat, slot, fraction) => {
 	ctx.translate(slot.x, slot.y);
 	ctx.rotate(slot.angle * Math.PI / 180);
-	ctx.drawImage(cat.asset["img"], 0, -cat.draw_height + (cat.draw_height * (1 - fraction)), 200, cat.draw_height);
+	ctx.drawImage(cat.asset["img"], -100, -cat.draw_height + (cat.draw_height * (1 - fraction)), 200, cat.draw_height);
 	// ctx.drawImage(assets["couch"]["img"], 0, -cat.draw_height + (cat.draw_height * (1 - fraction)), 200, cat.draw_height);
 	ctx.rotate(-slot.angle * Math.PI / 180);
 	ctx.translate(-slot.x, -slot.y);
 };
 
 const getCatPat = (slot, fraction) => {
-
+	// TODO
 };
 
 const draw = () => {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 	ctx.drawImage(assets["wallpaper"]["img"], 0, 0, 2883, 1350);
+	ctx.drawImage(assets["floor"]["img"], -30, height - 340, 3101, 400);
 
 	ctx.drawImage(assets["fireplace"]["img"], 630, -20, 832, 1160);
-
-	ctx.drawImage(assets["lamp"]["img"], 2090, 300, 270, 900);
 
 
 	// Draw Cats
 
-	drawCatInSlot(cats[0], SLOTS[0], 1);
-	drawCatInSlot(cats[0], SLOTS[1], 1);
-	drawCatInSlot(cats[0], SLOTS[2], 0.6);
-	drawCatInSlot(cats[0], SLOTS[3], 0.8);
-	drawCatInSlot(cats[0], SLOTS[4], 1.0);
+	currentCats.forEach(c => c.draw());
 
 
 	// Draw Fore-Background
@@ -211,6 +301,8 @@ const draw = () => {
 
 	ctx.drawImage(assets["pot"]["img"], 1200, 468, 202, 150);
 	ctx.drawImage(assets["other-pot"]["img"], 680, 395, 240, 222);
+
+	ctx.drawImage(assets["lamp"]["img"], 2090, 300, 270, 900);
 
 	ctx.drawImage(assets["plant"]["img"], 20, 680, 245, 500);
 
@@ -250,9 +342,19 @@ const gameLoop = () => {
 	const time = (new Date).getTime();
 
 	update(time);
-	draw();
+	draw(time);
 
 	window.requestAnimationFrame(gameLoop);
+};
+
+
+const changeSound = () => {
+	let randSong = Math.floor(Math.random() * songs.length);
+	while (randSong === currentSong) {
+		randSong = Math.floor(Math.random() * songs.length);
+	}
+
+	document.getElementById("beats").src = songs[randSong];
 };
 
 
@@ -284,6 +386,10 @@ document.addEventListener("DOMContentLoaded", () => {
 	window.addEventListener("keydown", e => {
 		keys[e.key] = true;
 	});
+
+	document.getElementById("beats").addEventListener("ended", changeSound);
+
+	changeSound();
 
 	gameLoop();
 });
