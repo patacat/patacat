@@ -356,8 +356,8 @@ const drawCatInSlot = (cat, slot, fraction, pattedFrame) => {
     ctx.translate(gs * slot.x, gs * slot.y);
     ctx.rotate(slot.angle * Math.PI / 180);
     if (pattedFrame === 0) {
-        ctx.fillRect(gs * -100, gs * (-cat.draw_height + (cat.draw_height * (1 - fraction))), gs * 200, gs * cat.draw_height);
-        // ctx.drawImage(cat.asset["img"], gs * -100, gs * (-cat.draw_height + (cat.draw_height * (1 - fraction))), gs * 200, gs * cat.draw_height);
+        // ctx.fillRect(gs * -100, gs * (-cat.draw_height + (cat.draw_height * (1 - fraction))), gs * 200, gs * cat.draw_height);
+        ctx.drawImage(cat.asset["img"], gs * -100, gs * (-cat.draw_height + (cat.draw_height * (1 - fraction))), gs * 200, gs * cat.draw_height);
     } else if (pattedFrame < 5) {
         ctx.drawImage(assets["poof" + pattedFrame.toString()]["img"], gs * -80, gs * (-100 - (10 * pattedFrame) + (80 * (1 - fraction))), gs * 160, gs * 160);
     }
