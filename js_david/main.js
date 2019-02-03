@@ -33,6 +33,9 @@ let fireTime = 0;
 let fire = 1;
 let back = 1;
 
+let fireCat = null;
+let fireCatSlot = {x: 1050, y: 865, angle: 180, occupied: false, time: 0};
+
 const RANDOM_ART = 1 + Math.floor(Math.random() * 4);
 
 let currentCats = [];
@@ -67,23 +70,31 @@ const DAMAGED_LENGTH = 1500;
 
 
 class Cat {
-    constructor(time) {
+    constructor(time, fc) {
         this.entering = true;
         this.leaving = false;
         this.patted = false;
         this.level = 0;
-        this.cat = cats[Math.floor(Math.random() * cats.length)];
+        this.cat = fc ? fireCat : cats[Math.floor(Math.random() * cats.length)];
+        this.fireCat = fc;
 
         this.initialTime = time;
 
         this.pattedTime = 0;
         this.pattedFrame = 0;
 
-        let slot = Math.floor(Math.random() * SLOTS.length);
-        while (SLOTS[slot].occupied) {
+        let slot;
+
+        if (fc) {
+            this.slot = fireCatSlot;
+        } else {
             slot = Math.floor(Math.random() * SLOTS.length);
+            while (SLOTS[slot].occupied) {
+                slot = Math.floor(Math.random() * SLOTS.length);
+            }
+            this.slot = SLOTS[slot];
         }
-        this.slot = SLOTS[slot];
+
         this.slot.occupied = true;
         currentCats.push(this);
         console.log(`Create cat`);
@@ -198,15 +209,32 @@ const CAT_INTERVAL = 1000;
 
 let lastCat = 0;
 
+const MAX_CATS = 3;
+
+let lastFireCat = 0;
+const FIRE_CAT_INTERVAL = 12000;
+
 
 const update = (time) => {
     // Cats
 
     currentCats.forEach(c => c.update(time));
 
-    if (time - lastCat >= CAT_INTERVAL && currentCats.length < 3) {
-        new Cat(time);
+    if (time - lastCat >= CAT_INTERVAL && currentCats.length < MAX_CATS) {
+        new Cat(time, false);
+        console.log('Create new cat');
         lastCat = time;
+    }
+
+
+    // Fire Cat
+
+    if (time - lastFireCat >= FIRE_CAT_INTERVAL + (-1000 + Math.random() * 2000) && !fireCatSlot.occupied) {
+        lastFireCat = time;
+        console.log("Create a fire cat");
+        fireCatSlot.occupied = true;
+        fireCatSlot.time = time;
+        currentCats.push(new Cat(time, true));
     }
 
 
@@ -292,6 +320,8 @@ const update = (time) => {
                         c.patted = true;
                         if (c.cat.name === "fake") {
                             player1.addScore(-30);
+                        } else if(c.cat.name === "fire-cat") {
+                            player1.addScore(30);
                         } else {
                             player1.addScore(10);
                         }
@@ -322,6 +352,8 @@ const update = (time) => {
                         c.patted = true;
                         if (c.cat.name === "fake") {
                             player2.addScore(-30);
+                        } else if(c.cat.name === "fire-cat") {
+                            player1.addScore(30);
                         } else {
                             player2.addScore(10);
                         }
@@ -441,6 +473,9 @@ const draw = () => {
 
     ctx.drawImage(assets["fireback"]["img"], gs * 877, gs * 866, gs * 340, gs * 272);
     ctx.drawImage(assets["back" + back.toString()]["img"], gs * 883, gs * 866, gs * 330, gs * 263);
+
+    currentCats.filter(c => c.fireCat).forEach(c => c.draw());
+
     ctx.drawImage(assets["fireplace"]["img"], gs * 630, gs * -20, gs * 832, gs * 1160);
 
     ctx.drawImage(assets["art" + RANDOM_ART.toString()]["img"], gs * 1690, gs * 260, gs * 480, gs * 337);
@@ -449,7 +484,7 @@ const draw = () => {
 
     // Draw Cats
 
-    currentCats.forEach(c => c.draw());
+    currentCats.filter(c => !c.fireCat).forEach(c => c.draw());
 
 
     // Draw Fore-Background
@@ -568,6 +603,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 name: k.substr(4),
                 draw_height: 200 * (assets[k]["h"] / assets[k]["w"])
             });
+        }
+
+        if (k === "fire-cat") {
+            fireCat = {
+                asset: assets[k],
+                name: k,
+                draw_height: 200 * (assets[k]["h"] / assets[k]["w"])
+            };
         }
     }
 
