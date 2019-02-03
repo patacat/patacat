@@ -82,7 +82,7 @@ class Cat {
         }
         this.slot = SLOTS[slot];
         this.slot.occupied = true;
-
+        this.slotIndex = slot;
         currentCats.push(this);
     };
 
@@ -96,6 +96,7 @@ class Cat {
 
         if (time - this.initialTime > CAT_LENGTH && !this.patted) {
             this.leaving = true;
+            console.log('Cat leaving');
         }
 
         if (this.patted) {
@@ -109,11 +110,12 @@ class Cat {
                 this.pattedTime = time;
                 this.pattedFrame += 1
             } else if (time - this.pattedTime > PAT_FRAME_LENGTH && this.pattedFrame === 5) {
-                for (let c in currentCats) {
-                    if (!currentCats.hasOwnProperty(c)) continue;
-                    if (currentCats[c] === this) {
+                this.slot.occupied = false;
+                for (let i = 0; i < currentCats.length; i++) {
+                    if (currentCats[i].slotIndex === this.slotIndex) {
+                        currentCats.splice(i, 1);
                         this.slot.occupied = false;
-                        currentCats.splice(c, 1);
+                        break;
                     }
                 }
             }
@@ -123,11 +125,11 @@ class Cat {
             this.level = Math.max(this.level - 0.1, 0.0);
             if (this.level <= 0.001) {
                 // TODO: DELETE
-                for (let c in currentCats) {
-                    if (!currentCats.hasOwnProperty(c)) continue;
-                    if (currentCats[c] === this) {
+                for (let i = 0; i < currentCats.length; i++) {
+                    if (currentCats[i].slotIndex === this.slotIndex) {
+                        currentCats.splice(i, 1);
                         this.slot.occupied = false;
-                        currentCats.splice(c, 1);
+                        break;
                     }
                 }
             }
@@ -196,6 +198,7 @@ const update = (time) => {
 
     if (time - lastCat >= CAT_INTERVAL && currentCats.length < 3) {
         new Cat(time);
+        console.log('Create new cat');
         lastCat = time;
     }
 
@@ -354,7 +357,8 @@ const drawCatInSlot = (cat, slot, fraction, pattedFrame) => {
     ctx.translate(gs * slot.x, gs * slot.y);
     ctx.rotate(slot.angle * Math.PI / 180);
     if (pattedFrame === 0) {
-        ctx.drawImage(cat.asset["img"], gs * -100, gs * (-cat.draw_height + (cat.draw_height * (1 - fraction))), gs * 200, gs * cat.draw_height);
+        ctx.fillRect(gs * -100, gs * (-cat.draw_height + (cat.draw_height * (1 - fraction))), gs * 200, gs * cat.draw_height);
+        // ctx.drawImage(cat.asset["img"], gs * -100, gs * (-cat.draw_height + (cat.draw_height * (1 - fraction))), gs * 200, gs * cat.draw_height);
     } else if (pattedFrame < 5) {
         ctx.drawImage(assets["poof" + pattedFrame.toString()]["img"], gs * -80, gs * (-100 - (10 * pattedFrame) + (80 * (1 - fraction))), gs * 160, gs * 160);
     }
