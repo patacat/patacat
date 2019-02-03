@@ -22,6 +22,8 @@ let fireTime = 0;
 let fire = 1;
 let back = 1;
 
+const RANDOM_ART = 1 + Math.floor(Math.random() * 4);
+
 let currentCats = [];
 
 let player1ScoreEl;
@@ -360,7 +362,7 @@ const draw = () => {
 	ctx.drawImage(assets["back" + back.toString()]["img"], 883, 866, 330, 263);
 	ctx.drawImage(assets["fireplace"]["img"], 630, -20, 832, 1160);
 
-	ctx.drawImage(assets["art1"]["img"], 1690, 260, 480, 337);
+	ctx.drawImage(assets["art" + RANDOM_ART.toString()]["img"], 1690, 260, 480, 337);
 	ctx.drawImage(assets["frame"]["img"], 1630, 170, 600, 524);
 
 
