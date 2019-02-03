@@ -63,6 +63,9 @@ const CAT_LENGTH = 2200;
 const PAT_FRAME_LENGTH = 100;
 
 
+const DAMAGED_LENGTH = 1500;
+
+
 class Cat {
     constructor(time) {
         this.entering = true;
@@ -104,7 +107,6 @@ class Cat {
                 this.pattedFrame = 1;
                 let meow = new Audio(meowRetriever.retrieve());
                 meow.play();
-                console.log("meow");
             } else if (time - this.pattedTime > PAT_FRAME_LENGTH && this.pattedFrame <= 4) {
                 this.pattedTime = time;
                 this.pattedFrame += 1
@@ -147,6 +149,10 @@ const player1 = {
     y: 0.3 * height,
 
     damaged: false,
+    damagedTime: 0,
+    damagedX: 0,
+    damagedY: 0,
+
     patting: false,
 
     v: 0,
@@ -165,6 +171,10 @@ const player2 = {
     y: 0.3 * height,
 
     damaged: false,
+    damagedTime: 0,
+    damagedX: 0,
+    damagedY: 0,
+
     patting: false,
 
     v: 0,
@@ -266,15 +276,25 @@ const update = (time) => {
     if (!player1.patting && keys["e"]) {
         player1.patting = true;
         if (player1.x + 30 >= 930 && player1.x + 30 <= 930 + 250
-            && player1.y - 80 >= 478 && player1.y - 80 <= 478 + 164) {
+                && player1.y - 80 >= 478 && player1.y - 80 <= 478 + 164) {
             changeSound();
+        } else if (Math.pow(player1.x + 30 - (player2.x - 60), 2)
+                + Math.pow(player1.y - player2.y, 2) <= 8000) {
+            player2.damaged = true;
+            player2.damagedTime = time;
+            player2.damagedX = player1.x;
+            player2.damagedY = player1.y;
         } else {
             currentCats.forEach(c => {
                 if (Math.pow(c.slot.x - (player1.x + 30), 2)
                     + Math.pow(c.slot.y - (player1.y - 80), 2) <= 40000) {
                     if (!c.patted) {
                         c.patted = true;
-                        player1.addScore(10);
+                        if (c.cat.name === "fake") {
+                            player1.addScore(-30);
+                        } else {
+                            player1.addScore(10);
+                        }
                     }
                 }
             });
@@ -288,13 +308,23 @@ const update = (time) => {
         if (player2.x - 60 >= 930 && player2.x - 60 <= 930 + 250
             && player2.y - 80 >= 478 && player2.y - 80 <= 478 + 164) {
             changeSound();
+        } else if (Math.pow(player1.x + 30 - (player2.x - 60), 2)
+                + Math.pow(player1.y - player2.y, 2) <= 7000) {
+            player1.damaged = true;
+            player1.damagedTime = time;
+            player1.damagedX = player1.x;
+            player1.damagedY = player1.y;
         } else {
             currentCats.forEach(c => {
                 if (Math.pow(c.slot.x - (player2.x + 30), 2)
                     + Math.pow(c.slot.y - (player2.y - 80), 2) <= 40000) {
                     if (!c.patted) {
                         c.patted = true;
-                        player2.addScore(10);
+                        if (c.cat.name === "fake") {
+                            player2.addScore(-30);
+                        } else {
+                            player2.addScore(10);
+                        }
                     }
                 }
             });
@@ -311,6 +341,45 @@ const update = (time) => {
 
     player2.x += Math.cos(player2.dir) * player2.v;
     player2.y -= Math.sin(player2.dir) * player2.v;
+
+
+    if (player1.damaged) {
+        if (player1.x < player1.damagedX) {
+            player1.x += Math.abs(player1.x - player1.damagedX) * 0.2;
+        } else if (player1.x > player1.damagedX) {
+            player1.x -= Math.abs(player1.x - player1.damagedX) * 0.2;
+        }
+
+        if (player1.y < player1.damagedY) {
+            player1.y += Math.abs(player1.y - player1.damagedY) * 0.2;
+        } else if (player1.y > player1.damagedY) {
+            player1.y -= Math.abs(player1.y - player1.damagedY) * 0.2;
+        }
+    }
+
+    if (player2.damaged) {
+        if (player2.x < player2.damagedX) {
+            player2.x += Math.abs(player2.x - player2.damagedX) * 0.2;
+        } else if (player2.x > player1.damagedX) {
+            player2.x -= Math.abs(player2.x - player2.damagedX) * 0.2;
+        }
+
+        if (player2.y < player2.damagedY) {
+            player2.y += Math.abs(player2.y - player2.damagedY) * 0.2;
+        } else if (player2.y > player1.damagedY) {
+            player2.y -= Math.abs(player2.y - player2.damagedY) * 0.2;
+        }
+    }
+
+    if (time - player1.damagedTime > DAMAGED_LENGTH) {
+        player1.damaged = false;
+        player1.damagedTime = 0;
+    }
+
+    if (time - player2.damagedTime > DAMAGED_LENGTH) {
+        player2.damaged = false;
+        player2.damagedTime = 0;
+    }
 
     if (player1.x < 100 || player1.y < 100 || player1.x > width - 100 || player1.y > height - 100
         || player2.x < 100 || player2.y < 100 || player2.x > width - 100 || player2.y > height - 100) {
@@ -495,6 +564,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (k.substr(0, 4) === "cat-") {
             cats.push({
                 asset: assets[k],
+                name: k.substr(4),
                 draw_height: 200 * (assets[k]["h"] / assets[k]["w"])
             });
         }
