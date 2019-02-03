@@ -260,8 +260,8 @@ const update = (time) => {
             changeSound();
         } else {
             currentCats.forEach(c => {
-                if (Math.pow(c.slot.x - gs * (player1.x + 30), 2)
-                    + Math.pow(c.slot.y - gs * (player1.y - 80), 2) <= 40000) {
+                if (Math.pow(gs * c.slot.x - gs * (player1.x + 30), 2)
+                    + Math.pow(gs * c.slot.y - gs * (player1.y - 80), 2) <= 40000) {
                     if (!c.patted) {
                         c.patted = true;
                         player1.addScore(10);
@@ -280,8 +280,8 @@ const update = (time) => {
             changeSound();
         } else {
             currentCats.forEach(c => {
-                if (Math.pow(c.slot.x - gs * (player2.x + 30), 2)
-                    + Math.pow(c.slot.y - gs * (player2.y - 80), 2) <= 40000) {
+                if (Math.pow(gs * c.slot.x - gs * (player2.x + 30), 2)
+                    + Math.pow(gs * c.slot.y - gs * (player2.y - 80), 2) <= 40000) {
                     if (!c.patted) {
                         c.patted = true;
                         player2.addScore(10);
@@ -341,7 +341,7 @@ const update = (time) => {
 };
 
 const drawCatInSlot = (cat, slot, fraction, pattedFrame) => {
-    ctx.translate(slot.x, slot.y);
+    ctx.translate(gs * slot.x, gs * slot.y);
     ctx.rotate(slot.angle * Math.PI / 180);
     if (pattedFrame === 0) {
         ctx.drawImage(cat.asset["img"], gs * -100, gs * (-cat.draw_height + (cat.draw_height * (1 - fraction))), gs * 200, gs * cat.draw_height);
@@ -350,7 +350,7 @@ const drawCatInSlot = (cat, slot, fraction, pattedFrame) => {
     }
     // ctx.drawImage(assets["couch"]["img"], 0, -cat.draw_height + (cat.draw_height * (1 - fraction)), 200, cat.draw_height);
     ctx.rotate(-slot.angle * Math.PI / 180);
-    ctx.translate(-slot.x, -slot.y);
+    ctx.translate(gs * -slot.x, gs * -slot.y);
 };
 
 const draw = () => {
@@ -442,13 +442,7 @@ const changeSound = () => {
     document.getElementById("beats").src = songs[randSong];
 };
 
-
-// Initialize!
-
-document.addEventListener("DOMContentLoaded", () => {
-    canvas = document.getElementById("main-canvas");
-    ctx = canvas.getContext("2d");
-
+const computeScale= () => {
     const w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
     const h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
@@ -461,12 +455,6 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.canvas.height = height * gs;
     ctx.canvas.width = width * gs;
 
-    // Update slot locations
-    SLOTS.forEach(s => {
-        s.x = gs * s.x;
-        s.y = gs * s.y;
-    });
-
     // Reposition scores
     const score1 = document.getElementById('player1-score');
     score1.style.left = `${gs * (width - 950 + 120)}px`;
@@ -474,6 +462,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const score2 = document.getElementById('player2-score');
     score2.style.left = `${gs * (width - 500 + 120)}px`;
     score2.style.top = `${gs * 50 + score1.offsetHeight}px`;
+};
+
+
+// Initialize!
+
+document.addEventListener("DOMContentLoaded", () => {
+    canvas = document.getElementById("main-canvas");
+    ctx = canvas.getContext("2d");
+
+    computeScale();
 
     for (let img of document.querySelectorAll("div#assets img")) {
         assets[img.id] = {};
@@ -508,3 +506,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
     gameLoop();
 });
+
+document.addEventListener("resize", computeScale);
