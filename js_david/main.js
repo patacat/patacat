@@ -20,22 +20,22 @@ let currentCats = [];
 
 const SLOTS = [
 	{x: 450, y: 760, angle: 0, occupied: false},
-	{x: 590, y: 880, angle: 73, occupied: false},
+	{x: 600, y: 880, angle: 73, occupied: false},
 
-	{x: 780, y: 480, angle: 0, occupied: false},
+	{x: 800, y: 480, angle: 0, occupied: false},
 
 	{x: 1820, y: 835, angle: 0, occupied: false},
 	{x: 2030, y: 835, angle: 0, occupied: false},
 	{x: 2240, y: 835, angle: 0, occupied: false},
 
-	{x: 2210, y: 580, angle: -68, occupied: false},
+	{x: 2150, y: 490, angle: -68, occupied: false},
 ];
 
 let width = 2560; // TODO
 let height = 1350; // TODO
 
 
-const CAT_LENGTH = 2000;
+const CAT_LENGTH = 2200;
 
 
 const PAT_FRAME_LENGTH = 100;
@@ -140,7 +140,7 @@ const player2 = {
 };
 
 
-const MAX_V = 20;
+const MAX_V = 25;
 const ACCEL = 1;
 
 
@@ -241,13 +241,26 @@ const update = (time) => {
 				}
 			});
 		}
-
 	} else if (player1.patting && !keys["e"]) {
 		player1.patting = false;
 	}
 
 	if (!player2.patting && keys["o"]) {
 		player2.patting = true;
+		if (player2.x - 60 >= 930 && player2.x - 60 <= 930 + 250
+			&& player2.y - 80 >= 478 && player2.y - 80 <= 478 + 164) {
+			changeSound();
+		} else {
+			currentCats.forEach(c => {
+				if (Math.pow(c.slot.x - (player2.x + 30), 2)
+					+ Math.pow(c.slot.y - (player2.y - 80), 2) <= 40000) {
+					if (!c.patted) {
+						c.patted = true;
+						c.pattedTime = time;
+					}
+				}
+			});
+		}
 	} else if (player2.patting && !keys["o"]) {
 		player2.patting = false;
 	}
@@ -301,7 +314,7 @@ const drawCatInSlot = (cat, slot, fraction, pattedFrame) => {
 	if (pattedFrame === 0) {
 		ctx.drawImage(cat.asset["img"], -100, -cat.draw_height + (cat.draw_height * (1 - fraction)), 200, cat.draw_height);
 	} else if (pattedFrame < 5) {
-		ctx.drawImage(assets["poof" + pattedFrame.toString()]["img"], -80, -100 + (80 * (1 - fraction)), 160, 160);
+		ctx.drawImage(assets["poof" + pattedFrame.toString()]["img"], -80, -100 - (10 * pattedFrame) + (80 * (1 - fraction)), 160, 160);
 	}
 	// ctx.drawImage(assets["couch"]["img"], 0, -cat.draw_height + (cat.draw_height * (1 - fraction)), 200, cat.draw_height);
 	ctx.rotate(-slot.angle * Math.PI / 180);
@@ -320,6 +333,7 @@ const draw = () => {
 
 	ctx.drawImage(assets["fireplace"]["img"], 630, -20, 832, 1160);
 
+	ctx.drawImage(assets["art1"]["img"], 1690, 260, 480, 337);
 	ctx.drawImage(assets["frame"]["img"], 1630, 170, 600, 524);
 
 
@@ -355,8 +369,8 @@ const draw = () => {
 			player1.x - 100, player1.y - 100, 200, 200);
 	}
 
-	ctx.drawImage(assets["fire1" + (player1.damaged ? "-damaged" : "")]["img"],
-		player1.x + 30, player1.y - 80, 20, 20);
+	// ctx.drawImage(assets["fire1" + (player1.damaged ? "-damaged" : "")]["img"],
+	// 	player1.x + 30, player1.y - 80, 20, 20);
 
 	// Player 2
 
@@ -368,8 +382,8 @@ const draw = () => {
 			player2.x - 100, player2.y - 100, 200, 200);
 	}
 
-	ctx.drawImage(assets["fire1" + (player2.damaged ? "-damaged" : "")]["img"],
-		player2.x - 60, player2.y - 80, 20, 20);
+	// ctx.drawImage(assets["fire1" + (player2.damaged ? "-damaged" : "")]["img"],
+	// 	player2.x - 60, player2.y - 80, 20, 20);
 };
 
 
