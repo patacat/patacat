@@ -1,5 +1,6 @@
 // Globals
 let gs = 1.0;
+const scale = window.devicePixelRatio;
 
 function randomRetriever(count, creator) {
     const options = [];
@@ -452,22 +453,25 @@ const computeScale = () => {
     const w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
     const h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
-    gs = Math.min(w / width, h / height);
+    gs = Math.min(w / width, h / height) * scale;
     if (gs === 0) {
-        gs = 1;
+        gs = scale;
     }
     console.log(`Global scaler ${gs}, w ${w} h ${h}`);
 
-    ctx.canvas.height = height * gs;
-    ctx.canvas.width = width * gs;
+    canvas.width = width * gs;
+    canvas.height = height * gs;
+
+    canvas.style.width = `${width * gs / scale}px`;
+    canvas.style.height = `${height * gs / scale}px`;
 
     // Reposition scores
     const score1 = document.getElementById('player1-score');
-    score1.style.left = `${gs * (width - 950 + 120)}px`;
-    score1.style.top = `${gs * 50 + score1.offsetHeight}px`;
+    score1.style.left = `${gs / scale * (width - 950 + 120)}px`;
+    score1.style.top = `${gs / scale * 50 + score1.offsetHeight / scale}px`;
     const score2 = document.getElementById('player2-score');
-    score2.style.left = `${gs * (width - 500 + 120)}px`;
-    score2.style.top = `${gs * 50 + score1.offsetHeight}px`;
+    score2.style.left = `${gs / scale * (width - 500 + 120)}px`;
+    score2.style.top = `${gs / scale * 50 + score1.offsetHeight / scale}px`;
 };
 
 
