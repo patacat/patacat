@@ -1,5 +1,12 @@
 // Globals
 
+const songs = [];
+for (let i = 1; i <= 24; i++) {
+	songs.push(`assets/songs/${i}.mp3`);
+}
+
+let currentSong = 0;
+
 let canvas;
 let ctx;
 let assets = {};
@@ -181,7 +188,7 @@ const drawCatInSlot = (cat, slot, fraction) => {
 };
 
 const getCatPat = (slot, fraction) => {
-
+	// TODO
 };
 
 const draw = () => {
@@ -256,6 +263,14 @@ const gameLoop = () => {
 };
 
 
+const changeSound = () => {
+	let randSong = Math.floor(Math.random() * songs.length);
+	while (randSong === currentSong) {
+		randSong = Math.floor(Math.random() * songs.length);
+	}
+};
+
+
 // Initialize!
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -284,6 +299,11 @@ document.addEventListener("DOMContentLoaded", () => {
 	window.addEventListener("keydown", e => {
 		keys[e.key] = true;
 	});
+
+	document.getElementById("boombox").addEventListener("click", changeSound);
+	document.getElementById("beats").addEventListener("ended", changeSound);
+
+	changeSound();
 
 	gameLoop();
 });
