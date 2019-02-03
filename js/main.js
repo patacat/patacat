@@ -1,13 +1,7 @@
 "use strict";
 // Globals
-var songs = [];
-for (var i = 1; i <= 24; i++) {
-    songs.push("assets/songs/" + i + ".mp3");
-}
-var currentSong = 0;
 var canvas;
 var ctx;
-var assets = {};
 var cats = [];
 var fireTime = 0;
 var fire = 1;
@@ -169,22 +163,35 @@ var getCatPat = function (slot, fraction) {
 };
 var draw = function (time) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(assets["wallpaper"]["img"], 0, 0, 2883, 1350);
-    ctx.drawImage(assets["floor"]["img"], -30, height - 340, 3101, 400);
-    ctx.drawImage(assets["fireplace"]["img"], 630, -20, 832, 1160);
-    ctx.drawImage(assets["lamp"]["img"], 2090, 300, 270, 900);
-    // Draw Cats
-    globalConfigs.currentCats.forEach(function (c) { return c.draw(); });
-    // Draw Fore-Background
-    ctx.drawImage(assets["boombox"]["img"], 930, 478, 250, 164);
-    ctx.drawImage(assets["fire" + fire.toString()]["img"], 920, 890, 240, 244);
-    ctx.drawImage(assets["pot"]["img"], 1200, 468, 202, 150);
-    ctx.drawImage(assets["other-pot"]["img"], 680, 395, 240, 222);
-    ctx.drawImage(assets["lamp"]["img"], 2090, 300, 270, 900);
-    ctx.drawImage(assets["plant"]["img"], 20, 680, 245, 500);
-    ctx.drawImage(assets["couch"]["img"], 200, 730, 508, 450);
-    ctx.drawImage(assets["large-couch"]["img"], 1400, 820, 1000, 366);
-    players.forEach(function (p) { return p.draw(ctx, assets); });
+    drawAssets(ctx, 'wallpaper', 'floor', 'fireplace', "fire1");
+    // ctx.drawImage(assets["wallpaper"]["img"], 0, 0, 2883, 1350);
+    // ctx.drawImage(assets["floor"]["img"], -30, height - 340, 3101, 400);
+    //
+    // ctx.drawImage(assets["fireplace"]["img"], 630, -20, 832, 1160);
+    //
+    // ctx.drawImage(assets["lamp"]["img"], 2090, 300, 270, 900);
+    //
+    //
+    // // Draw Cats
+    //
+    // globalConfigs.currentCats.forEach(c => c.draw());
+    //
+    // // Draw Fore-Background
+    //
+    // ctx.drawImage(assets["boombox"]["img"], 930, 478, 250, 164);
+    //
+    // ctx.drawImage(assets["fire" + fire.toString()]["img"], 920, 890, 240, 244);
+    //
+    // ctx.drawImage(assets["pot"]["img"], 1200, 468, 202, 150);
+    // ctx.drawImage(assets["other-pot"]["img"], 680, 395, 240, 222);
+    //
+    // ctx.drawImage(assets["lamp"]["img"], 2090, 300, 270, 900);
+    //
+    // ctx.drawImage(assets["plant"]["img"], 20, 680, 245, 500);
+    //
+    // ctx.drawImage(assets["couch"]["img"], 200, 730, 508, 450);
+    // ctx.drawImage(assets["large-couch"]["img"], 1400, 820, 1000, 366);
+    players.forEach(function (p) { return p.draw(ctx, canvasAssets); });
 };
 var gameLoop = function () {
     var time = (new Date).getTime();
@@ -192,35 +199,20 @@ var gameLoop = function () {
     draw(time);
     window.requestAnimationFrame(gameLoop);
 };
-var changeSound = function () {
-    // let randSong = Math.floor(Math.random() * songs.length);
-    // while (randSong === currentSong) {
-    //     randSong = Math.floor(Math.random() * songs.length);
-    // }
-    //
-    // document.getElementById("beats").src = songs[randSong];
-};
 // Initialize!
 document.addEventListener("DOMContentLoaded", function () {
     canvas = document.getElementById("main-canvas");
     ctx = canvas.getContext("2d");
-    document.querySelectorAll("div#assets img").forEach(function (el) {
-        var img = el;
-        assets[img.id] = {};
-        assets[img.id]["img"] = img;
-        assets[img.id]["w"] = img.width;
-        assets[img.id]["h"] = img.height;
-    });
-    for (var k in assets) {
-        if (!assets.hasOwnProperty(k))
-            continue;
-        if (k.substr(0, 4) === "cat-") {
-            cats.push({
-                asset: assets[k],
-                draw_height: 200 * (assets[k]["h"] / assets[k]["w"])
-            });
-        }
-    }
+    canvasAssets = getCanvasAssets(canvas);
+    // for (let k in assets) {
+    //     if (!assets.hasOwnProperty(k)) continue;
+    //     if (k.substr(0, 4) === "cat-") {
+    //         cats.push({
+    //             asset: assets[k],
+    //             draw_height: 200 * (assets[k]["h"] / assets[k]["w"])
+    //         });
+    //     }
+    // }
     window.addEventListener("keyup", function (e) {
         players.forEach(function (p) { return p.onKeyUp(e.key); });
     });
