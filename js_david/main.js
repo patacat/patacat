@@ -500,11 +500,11 @@ document.addEventListener("DOMContentLoaded", () => {
         keys[e.key] = true;
     });
 
+    window.addEventListener("resize", computeScale);
+
     document.getElementById("beats").addEventListener("ended", changeSound);
 
     changeSound();
 
     gameLoop();
 });
-
-document.addEventListener("resize", computeScale);
