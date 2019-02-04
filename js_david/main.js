@@ -160,6 +160,9 @@ class Cat {
 
 // Players
 
+/**
+ * @type {Player[]}
+ */
 const players = [];
 
 class Player {
@@ -320,6 +323,25 @@ class Player {
             this.damaged = false;
             this.damagedTime = 0;
         }
+
+
+        // Bounds Checking
+
+        if (this.x < 100 || this.y < 100 || this.x > width - 100 || this.y > height - 100) {
+            for (let k in this.controls) {
+                if (!this.controls.hasOwnProperty(k)) continue;
+                keys[this.controls[k]] = false;
+            }
+        }
+
+        if (this.x < 100 || this.y < 100 || this.x > width - 100 || this.y > height - 100) {
+            this.dir = this.dir - Math.PI;
+        }
+
+        if (this.x < 100) this.x = 100;
+        if (this.y < 100) this.y = 100;
+        if (this.x > width - 100) this.x = width - 100;
+        if (this.y > height - 100) this.y = height - 100;
     }
 
     draw() {
@@ -383,35 +405,11 @@ const update = (time) => {
 
 
     // Player Updates
-    player1.update(time);
-    player2.update(time);
 
-    if (player1.x < 100 || player1.y < 100 || player1.x > width - 100 || player1.y > height - 100
-        || player2.x < 100 || player2.y < 100 || player2.x > width - 100 || player2.y > height - 100) {
-        for (let k in keys) {
-            if (!keys.hasOwnProperty(k)) continue;
-            keys[k] = false;
-        }
-    }
+    players.forEach(p => p.update(time));
 
-    if (player1.x < 100 || player1.y < 100 || player1.x > width - 100 || player1.y > height - 100) {
-        player1.dir = player1.dir - Math.PI;
-    }
 
-    if (player2.x < 100 || player2.y < 100 || player2.x > width - 100 || player2.y > height - 100) {
-        player2.dir = player2.dir - Math.PI;
-    }
-
-    if (player1.x < 100) player1.x = 100;
-    if (player1.y < 100) player1.y = 100;
-    if (player1.x > width - 100) player1.x = width - 100;
-    if (player1.y > height - 100) player1.y = height - 100;
-
-    if (player2.x < 100) player2.x = 100;
-    if (player2.y < 100) player2.y = 100;
-    if (player2.x > width - 100) player2.x = width - 100;
-    if (player2.y > height - 100) player2.y = height - 100;
-
+    // Fire Updates
     if (time - fireTime > 250) {
         fireTime = time;
         // noinspection UnnecessaryLocalVariableJS
