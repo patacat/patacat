@@ -65,14 +65,9 @@ class Cat {
 				this.pattedTime = time;
 				this.pattedFrame += 1
 			} else if (time - this.pattedTime > PAT_FRAME_LENGTH && this.pattedFrame === 5) {
-				for (let c in Cat.currentCats) {
-					if (!Cat.currentCats.hasOwnProperty(c)) continue;
-					if (Cat.currentCats[c] !== this) continue;
-
-					this._deleted = true;
-					this.slot.occupied = false;
-					Cat.currentCats.splice(c, 1);
-				}
+				Cat.currentCats = Cat.currentCats.filter(c => c !== this);
+				this._deleted = true;
+				this.slot.occupied = false;
 			}
 
 			return;
@@ -82,15 +77,9 @@ class Cat {
 			this.level = Math.max(this.level - 0.1, 0.0);
 			if (this.level > 0.001) return;
 
-			// TODO: DELETE
-			for (let c in Cat.currentCats) {
-				if (!Cat.currentCats.hasOwnProperty(c)) continue;
-				if (Cat.currentCats[c] !== this) continue;
-
-				this._deleted = true;
-				this.slot.occupied = false;
-				Cat.currentCats.splice(c, 1);
-			}
+			Cat.currentCats = Cat.currentCats.filter(c => c !== this);
+			this._deleted = true;
+			this.slot.occupied = false;
 		}
 	}
 
