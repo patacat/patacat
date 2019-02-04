@@ -164,12 +164,14 @@ const players = [];
 
 class Player {
     constructor(props) {
+        this.assets = props.assets;
+
         this.x = props.x;
         this.y = props.y;
 
         this.controls = props.controls;
         this._offsetX = props.point.offsetX;
-        this._offsetY = props.point.offsetY
+        this._offsetY = props.point.offsetY;
 
         this.damaged = false;
         this.damagedTime = 0;
@@ -198,6 +200,11 @@ class Player {
 
     _hitOtherPlayer(p) {
         return Math.pow(this.pointX() - p.pointX(), 2) + Math.pow(this.y - p.y, 2) <= 8000;
+    }
+
+    addScore(s) {
+        this.score += s;
+        this.scoreElement.innerHTML = this.score.toFixed();
     }
 
     update(time) {
@@ -279,42 +286,50 @@ class Player {
                     });
                 }
             }
-
-            // if (true) {}
-            // else if (Math.pow(player1.x + 30 - (player2.x - 60), 2)
-            //     + Math.pow(player1.y - player2.y, 2) <= 8000) {
-            //     player2.damaged = true;
-            //     player2.damagedTime = time;
-            //     player2.damagedX = player1.x;
-            //     player2.damagedY = player1.y;
-            // } else {
-            //     currentCats.forEach(c => {
-            //         if (Math.pow(c.slot.x - (player1.x + 30), 2)
-            //             + Math.pow(c.slot.y - (player1.y - 80), 2) <= 40000) {
-            //             if (!c.patted) {
-            //                 c.patted = true;
-            //                 if (c.cat.name === "fake") {
-            //                     player1.addScore(-30);
-            //                 } else if(c.cat.name === "fire-cat") {
-            //                     player1.addScore(30);
-            //                 } else {
-            //                     player1.addScore(10);
-            //                 }
-            //             }
-            //         }
-            //     });
-            // }
         } else if (this.patting && !keys[this.controls.pat]) {
             this.patting = false;
         }
 
 
         // Movement
+
+        this.x += Math.cos(this.dir) * this.v;
+        this.y -= Math.sin(this.dir) * this.v;
+
+
+        // Modified Damage Movement
+
+        if (this.damaged) {
+            if (this.x < this.damagedX) {
+                this.x += Math.abs(this.x - this.damagedX) * 0.2;
+            } else if (this.x > this.damagedX) {
+                this.x -= Math.abs(this.x - this.damagedX) * 0.2;
+            }
+
+            if (this.y < this.damagedY) {
+                this.y += Math.abs(this.y - this.damagedY) * 0.2;
+            } else if (this.y > this.damagedY) {
+                this.y -= Math.abs(this.y - this.damagedY) * 0.2;
+            }
+        }
+
+
+        // Update Damage Status
+
+        if (time - this.damagedTime > DAMAGED_LENGTH) {
+            this.damaged = false;
+            this.damagedTime = 0;
+        }
     }
 
-    addScore(s) {
-        this.score += s;
-        this.scoreElement.innerHTML = this.score.toFixed();
+    draw() {
+        if (this.patting) {
+            ctx.drawImage((this.damaged ? this.assets.damaged : this.assets.normal)["img"],
+                gs * (this.x - 85), gs * (this.y - 85), gs * 170, gs * 170);
+        } else {
+            ctx.drawImage((this.damaged ? this.assets.damaged : this.assets.normal)["img"],
+                gs * (this.x - 100), gs * (this.y - 100), gs * 200, gs * 200);
+        }
     }
 }
 
@@ -370,54 +385,6 @@ const update = (time) => {
     // Player Updates
     player1.update(time);
     player2.update(time);
-
-
-    // Update positions
-
-    player1.x += Math.cos(player1.dir) * player1.v;
-    player1.y -= Math.sin(player1.dir) * player1.v;
-
-    player2.x += Math.cos(player2.dir) * player2.v;
-    player2.y -= Math.sin(player2.dir) * player2.v;
-
-
-    if (player1.damaged) {
-        if (player1.x < player1.damagedX) {
-            player1.x += Math.abs(player1.x - player1.damagedX) * 0.2;
-        } else if (player1.x > player1.damagedX) {
-            player1.x -= Math.abs(player1.x - player1.damagedX) * 0.2;
-        }
-
-        if (player1.y < player1.damagedY) {
-            player1.y += Math.abs(player1.y - player1.damagedY) * 0.2;
-        } else if (player1.y > player1.damagedY) {
-            player1.y -= Math.abs(player1.y - player1.damagedY) * 0.2;
-        }
-    }
-
-    if (player2.damaged) {
-        if (player2.x < player2.damagedX) {
-            player2.x += Math.abs(player2.x - player2.damagedX) * 0.2;
-        } else if (player2.x > player1.damagedX) {
-            player2.x -= Math.abs(player2.x - player2.damagedX) * 0.2;
-        }
-
-        if (player2.y < player2.damagedY) {
-            player2.y += Math.abs(player2.y - player2.damagedY) * 0.2;
-        } else if (player2.y > player1.damagedY) {
-            player2.y -= Math.abs(player2.y - player2.damagedY) * 0.2;
-        }
-    }
-
-    if (time - player1.damagedTime > DAMAGED_LENGTH) {
-        player1.damaged = false;
-        player1.damagedTime = 0;
-    }
-
-    if (time - player2.damagedTime > DAMAGED_LENGTH) {
-        player2.damaged = false;
-        player2.damagedTime = 0;
-    }
 
     if (player1.x < 100 || player1.y < 100 || player1.x > width - 100 || player1.y > height - 100
         || player2.x < 100 || player2.y < 100 || player2.x > width - 100 || player2.y > height - 100) {
@@ -510,31 +477,9 @@ const draw = () => {
     ctx.drawImage(assets["large-couch"]["img"], gs * 1400, gs * 820, gs * 1000, gs * 366);
 
 
-    // Player 1
+    // Players
 
-    if (player1.patting) {
-        ctx.drawImage(assets["player1" + (player1.damaged ? "-damaged" : "")]["img"],
-            gs * (player1.x - 85), gs * (player1.y - 85), gs * 170, gs * 170);
-    } else {
-        ctx.drawImage(assets["player1" + (player1.damaged ? "-damaged" : "")]["img"],
-            gs * (player1.x - 100), gs * (player1.y - 100), gs * 200, gs * 200);
-    }
-
-    // ctx.drawImage(assets["fire1" + (player1.damaged ? "-damaged" : "")]["img"],
-    // 	player1.x + 30, player1.y - 80, 20, 20);
-
-    // Player 2
-
-    if (player2.patting) {
-        ctx.drawImage(assets["player2" + (player2.damaged ? "-damaged" : "")]["img"],
-            gs * (player2.x - 85), gs * (player2.y - 85), gs * 170, gs * 170);
-    } else {
-        ctx.drawImage(assets["player2" + (player2.damaged ? "-damaged" : "")]["img"],
-            gs * (player2.x - 100), gs * (player2.y - 100), gs * 200, gs * 200);
-    }
-
-    // ctx.drawImage(assets["fire1" + (player2.damaged ? "-damaged" : "")]["img"],
-    // 	player2.x - 60, player2.y - 80, 20, 20);
+    players.forEach(p => p.draw());
 
 
     // Scoring
@@ -624,6 +569,11 @@ document.addEventListener("DOMContentLoaded", () => {
     player2ScoreEl = document.getElementById("player2-score-value");
 
     player1 = new Player({
+        assets: {
+            normal: assets["player1"],
+            damaged: assets["player1-damaged"]
+        },
+
         x: 0.25 * width + 50,
         y: 0.3 * height,
         element: player1ScoreEl,
@@ -642,7 +592,13 @@ document.addEventListener("DOMContentLoaded", () => {
             offsetY: -80
         }
     });
+
     player2 = new Player({
+        assets: {
+            normal: assets["player2"],
+            damaged: assets["player2-damaged"]
+        },
+
         x: 0.75 * width - 50,
         y: 0.3 * height,
         element: player2ScoreEl,
