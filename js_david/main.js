@@ -19,6 +19,8 @@ function randomRetriever(count, creator) {
 const songRetriever = randomRetriever(24, i => `assets/songs/${i + 1}.mp3`);
 const meowRetriever = randomRetriever(83, i => `assets/meows/${i + 1}.m4a`);
 
+let currentSong = null;
+
 let canvas;
 let ctx;
 let assets = {};
@@ -179,10 +181,15 @@ const gameLoop = () => {
 };
 
 
-const changeSound = () => {
+const playNewSong = () => {
     const newSong = songRetriever.retrieve();
     console.log(`Changing song to ${newSong}`);
-    document.getElementById("beats").src = newSong;
+    if (currentSong !== null && !currentSong.ended) currentSong.pause();
+    currentSong = new Audio(newSong);
+    currentSong.play().catch(err => {
+        console.log(`Could not start song (Error: ${err})`);
+    });
+    currentSong.addEventListener("ended", playNewSong);
 };
 
 const computeScale = () => {
@@ -303,9 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("resize", computeScale);
 
-    document.getElementById("beats").addEventListener("ended", changeSound);
-
-    changeSound();
+    playNewSong();
 
     gameLoop();
 });

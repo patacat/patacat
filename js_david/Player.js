@@ -92,7 +92,7 @@ class Player {
 			if (this.pointX() >= 930 && this.pointX() <= 930 + 250
 				&& this.pointY() >= 478 && this.pointY() <= 478 + 164) {
 				// Boombox
-				changeSound();
+				playNewSong();
 			} else {
 				let hitSomething = false;
 				Player.players.filter((p, i) => i !== this.index && this._hitOtherPlayer(p))

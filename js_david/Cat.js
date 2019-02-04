@@ -58,7 +58,9 @@ class Cat {
 				this.pattedTime = time;
 				this.pattedFrame = 1;
 				let meow = new Audio(meowRetriever.retrieve());
-				meow.play().then(() => {});
+				meow.play().catch(err => {
+					console.log(`Could not play meow (Error: ${err})`);
+				});
 			} else if (time - this.pattedTime > PAT_FRAME_LENGTH && this.pattedFrame <= 4) {
 				this.pattedTime = time;
 				this.pattedFrame += 1
