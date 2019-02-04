@@ -16,19 +16,15 @@ function randomRetriever(count, creator) {
     };
 }
 
-const songRetriever = randomRetriever(24, (i) => {
-    return `assets/songs/${i + 1}.mp3`;
-});
-const meowRetriever = randomRetriever(83, (i) => {
-    return `assets/meows/${i + 1}.m4a`;
-});
+const songRetriever = randomRetriever(24, i => `assets/songs/${i + 1}.mp3`);
+const meowRetriever = randomRetriever(83, i => `assets/meows/${i + 1}.m4a`);
 
 let canvas;
 let ctx;
 let assets = {};
 
 /**
- * @type {Cat[]}
+ * @type {CatType[]}
  */
 let cats = [];
 
@@ -47,9 +43,6 @@ const RANDOM_ART = 1 + Math.floor(Math.random() * 4);
  * @type {Cat[]}
  */
 let currentCats = [];
-
-let player1ScoreEl;
-let player2ScoreEl;
 
 const SLOTS = [
     {x: 450, y: 760, angle: 0, occupied: false},
@@ -77,6 +70,15 @@ const PAT_FRAME_LENGTH = 100;
 const DAMAGED_LENGTH = 1500;
 
 
+class CatType {
+    constructor(props) {
+        this.asset = props.asset;
+        this.name = props.name;
+        this.drawHeight = 200 * (this.asset["h"] / this.asset["w"]);
+    }
+}
+
+
 class Cat {
     constructor(time, fc) {
         this.entering = true;
@@ -86,7 +88,12 @@ class Cat {
         this._deleted = false;
 
         this.level = 0;
+
+        /**
+         * @type {CatType}
+         */
         this.cat = fc ? fireCat : cats[Math.floor(Math.random() * cats.length)];
+
         this.fireCat = fc;
 
         this.initialTime = time;
@@ -152,16 +159,16 @@ class Cat {
 
         if (this.leaving && !this.patted) {
             this.level = Math.max(this.level - 0.1, 0.0);
-            if (this.level <= 0.001) {
-                // TODO: DELETE
-                for (let c in currentCats) {
-                    if (!currentCats.hasOwnProperty(c)) continue;
-                    if (currentCats[c] !== this) continue;
+            if (this.level > 0.001) return;
 
-                    this._deleted = true;
-                    this.slot.occupied = false;
-                    currentCats.splice(c, 1);
-                }
+            // TODO: DELETE
+            for (let c in currentCats) {
+                if (!currentCats.hasOwnProperty(c)) continue;
+                if (currentCats[c] !== this) continue;
+
+                this._deleted = true;
+                this.slot.occupied = false;
+                currentCats.splice(c, 1);
             }
         }
     }
@@ -172,12 +179,26 @@ class Cat {
         ctx.translate(gs * this.slot.x, gs * this.slot.y);
         ctx.rotate(this.slot.angle * Math.PI / 180);
         if (this.pattedFrame === 0) {
-            // ctx.fillRect(gs * -100, gs * (-cat.draw_height + (cat.draw_height * (1 - fraction))), gs * 200, gs * cat.draw_height);
-            ctx.drawImage(this.cat.asset["img"], gs * -100, gs * (-this.cat.draw_height + (this.cat.draw_height * (1 - this.level))), gs * 200, gs * this.cat.draw_height);
+            // ctx.fillRect(gs * -100, gs * (-cat.draw_height + (cat.draw_height * (1 - fraction))), gs * 200,
+            //     gs * cat.draw_height);
+            ctx.drawImage(
+                this.cat.asset["img"],
+                gs * -100,
+                gs * (-this.cat.drawHeight + (this.cat.drawHeight * (1 - this.level))),
+                gs * 200,
+                gs * this.cat.drawHeight
+            );
         } else if (this.pattedFrame < 5) {
-            ctx.drawImage(assets["poof" + this.pattedFrame.toString()]["img"], gs * -80, gs * (-100 - (10 * this.pattedFrame) + (80 * (1 - this.level))), gs * 160, gs * 160);
+            ctx.drawImage(
+                assets["poof" + this.pattedFrame.toString()]["img"],
+                gs * -80,
+                gs * (-100 - (10 * this.pattedFrame) + (80 * (1 - this.level))),
+                gs * 160,
+                gs * 160
+            );
         }
-        // ctx.drawImage(assets["couch"]["img"], 0, -cat.draw_height + (cat.draw_height * (1 - fraction)), 200, cat.draw_height);
+        // ctx.drawImage(assets["couch"]["img"], 0, -cat.draw_height + (cat.draw_height * (1 - fraction)), 200,
+        //     cat.draw_height);
         ctx.rotate(-this.slot.angle * Math.PI / 180);
         ctx.translate(gs * -this.slot.x, gs * -this.slot.y);
     }
@@ -300,17 +321,17 @@ class Player {
                 if (!hitSomething) {
                     currentCats.forEach(c => {
                         if (Math.pow(c.slot.x - this.pointX(), 2)
-                            + Math.pow(c.slot.y - this.pointY(), 2) <= 40000) {
-                            if (!c.patted) {
-                                c.patted = true;
-                                if (c.cat.name === "fake") {
-                                    this.addScore(-30);
-                                } else if(c.cat.name === "fire-cat") {
-                                    this.addScore(30);
-                                } else {
-                                    this.addScore(10);
-                                }
-                            }
+                            + Math.pow(c.slot.y - this.pointY(), 2) > 40000) return;
+
+                        if (c.patted) return;
+
+                        c.patted = true;
+                        if (c.cat.name === "fake") {
+                            this.addScore(-30);
+                        } else if(c.cat.name === "fire-cat") {
+                            this.addScore(30);
+                        } else {
+                            this.addScore(10);
                         }
                     });
                 }
@@ -379,16 +400,6 @@ class Player {
             gs * (this.x - 100), gs * (this.y - 100), gs * 200, gs * 200);
     }
 }
-
-/**
- * @type Player
- */
-let player1;
-
-/**
- * @type Player
- */
-let player2;
 
 
 const MAX_V = 25;
@@ -530,10 +541,13 @@ const computeScale = () => {
     canvas.style.width = `${width * gs / scale}px`;
     canvas.style.height = `${height * gs / scale}px`;
 
+
     // Reposition scores
+
     const score1 = document.getElementById('player1-score');
     score1.style.left = `${gs / scale * (width - 950 + 120)}px`;
     score1.style.top = `${gs / scale * 50 + score1.offsetHeight * gs / scale}px`;
+
     const score2 = document.getElementById('player2-score');
     score2.style.left = `${gs / scale * (width - 500 + 120)}px`;
     score2.style.top = `${gs / scale * 50 + score1.offsetHeight * gs / scale}px`;
@@ -558,26 +572,28 @@ document.addEventListener("DOMContentLoaded", () => {
     for (let k in assets) {
         if (!assets.hasOwnProperty(k)) continue;
         if (k.substr(0, 4) === "cat-") {
-            cats.push({
+            cats.push(new CatType({
                 asset: assets[k],
-                name: k.substr(4),
-                draw_height: 200 * (assets[k]["h"] / assets[k]["w"])
-            });
+                name: k.substr(4)
+            }));
         }
 
         if (k === "fire-cat") {
-            fireCat = {
+            fireCat = new CatType({
                 asset: assets[k],
-                name: k,
-                draw_height: 200 * (assets[k]["h"] / assets[k]["w"])
-            };
+                name: k
+            });
+
+            // fireCat = {
+            //     asset: assets[k],
+            //     name: k,
+            //     draw_height: 200 * (assets[k]["h"] / assets[k]["w"])
+            // };
         }
     }
 
-    player1ScoreEl = document.getElementById("player1-score-value");
-    player2ScoreEl = document.getElementById("player2-score-value");
-
-    player1 = new Player({
+    // Player 1
+    new Player({
         assets: {
             normal: assets["player1"],
             damaged: assets["player1-damaged"]
@@ -585,7 +601,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         x: 0.25 * width + 50,
         y: 0.3 * height,
-        element: player1ScoreEl,
+        element: document.getElementById("player1-score-value"),
 
         controls: {
             up: "w",
@@ -602,7 +618,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    player2 = new Player({
+    // Player 2
+    new Player({
         assets: {
             normal: assets["player2"],
             damaged: assets["player2-damaged"]
@@ -610,7 +627,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         x: 0.75 * width - 50,
         y: 0.3 * height,
-        element: player2ScoreEl,
+        element: document.getElementById("player2-score-value"),
 
         controls: {
             up: "i",
