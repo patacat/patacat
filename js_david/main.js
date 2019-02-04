@@ -23,11 +23,6 @@ let canvas;
 let ctx;
 let assets = {};
 
-/**
- * @type {CatType[]}
- */
-let cats = [];
-
 let keys = {};
 
 let fireTime = 0;
@@ -39,16 +34,11 @@ let fireCatSlot = {x: 1050, y: 865, angle: 180, occupied: false, time: 0};
 
 const RANDOM_ART = 1 + Math.floor(Math.random() * 4);
 
-/**
- * @type {Cat[]}
- */
-let currentCats = [];
-
 const SLOTS = [
     {x: 450, y: 760, angle: 0, occupied: false},
     {x: 600, y: 880, angle: 73, occupied: false},
 
-    {x: 800, y: 480, angle: 0, occupied: false},
+    {x: 800, y: 500, angle: 0, occupied: false},
 
     {x: 1820, y: 835, angle: 0, occupied: false},
     {x: 2030, y: 835, angle: 0, occupied: false},
@@ -68,141 +58,6 @@ const PAT_FRAME_LENGTH = 100;
 
 
 const DAMAGED_LENGTH = 1500;
-
-
-class CatType {
-    constructor(props) {
-        this.asset = props.asset;
-        this.name = props.name;
-        this.drawHeight = 200 * (this.asset["h"] / this.asset["w"]);
-    }
-}
-
-
-class Cat {
-    constructor(time, fc) {
-        this.entering = true;
-        this.leaving = false;
-        this.patted = false;
-
-        this._deleted = false;
-
-        this.level = 0;
-
-        /**
-         * @type {CatType}
-         */
-        this.cat = fc ? fireCat : cats[Math.floor(Math.random() * cats.length)];
-
-        this.fireCat = fc;
-
-        this.initialTime = time;
-
-        this.pattedTime = 0;
-        this.pattedFrame = 0;
-
-        let slot;
-
-        if (fc) {
-            this.slot = fireCatSlot;
-        } else {
-            slot = Math.floor(Math.random() * SLOTS.length);
-            while (SLOTS[slot].occupied) {
-                slot = Math.floor(Math.random() * SLOTS.length);
-            }
-            this.slot = SLOTS[slot];
-        }
-
-        this.slot.occupied = true;
-        currentCats.push(this);
-        console.log(`Create cat`);
-    };
-
-    update(time) {
-        if (this._deleted) return;
-
-        if (this.entering && !this.patted) {
-            this.level = Math.min(this.level + 0.1, 1.0);
-            if (this.level >= 0.999) {
-                this.entering = false;
-            }
-
-            return;
-        }
-
-        if (time - this.initialTime > CAT_LENGTH && !this.patted) {
-            this.leaving = true;
-        }
-
-        if (this.patted) {
-            if (this.pattedTime === 0) {
-                this.pattedTime = time;
-                this.pattedFrame = 1;
-                let meow = new Audio(meowRetriever.retrieve());
-                meow.play().then(() => {});
-            } else if (time - this.pattedTime > PAT_FRAME_LENGTH && this.pattedFrame <= 4) {
-                this.pattedTime = time;
-                this.pattedFrame += 1
-            } else if (time - this.pattedTime > PAT_FRAME_LENGTH && this.pattedFrame === 5) {
-                for (let c in currentCats) {
-                    if (!currentCats.hasOwnProperty(c)) continue;
-                    if (currentCats[c] !== this) continue;
-
-                    this._deleted = true;
-                    this.slot.occupied = false;
-                    currentCats.splice(c, 1);
-                }
-            }
-
-            return;
-        }
-
-        if (this.leaving && !this.patted) {
-            this.level = Math.max(this.level - 0.1, 0.0);
-            if (this.level > 0.001) return;
-
-            // TODO: DELETE
-            for (let c in currentCats) {
-                if (!currentCats.hasOwnProperty(c)) continue;
-                if (currentCats[c] !== this) continue;
-
-                this._deleted = true;
-                this.slot.occupied = false;
-                currentCats.splice(c, 1);
-            }
-        }
-    }
-
-    draw() {
-        if (this._deleted) return;
-
-        ctx.translate(gs * this.slot.x, gs * this.slot.y);
-        ctx.rotate(this.slot.angle * Math.PI / 180);
-        if (this.pattedFrame === 0) {
-            // ctx.fillRect(gs * -100, gs * (-cat.draw_height + (cat.draw_height * (1 - fraction))), gs * 200,
-            //     gs * cat.draw_height);
-            ctx.drawImage(
-                this.cat.asset["img"],
-                gs * -100,
-                gs * (-this.cat.drawHeight + (this.cat.drawHeight * (1 - this.level))),
-                gs * 200,
-                gs * this.cat.drawHeight
-            );
-        } else if (this.pattedFrame < 5) {
-            ctx.drawImage(
-                assets["poof" + this.pattedFrame.toString()]["img"],
-                gs * -80,
-                gs * (-100 - (10 * this.pattedFrame) + (80 * (1 - this.level))),
-                gs * 160,
-                gs * 160
-            );
-        }
-        // ctx.drawImage(assets["couch"]["img"], 0, -cat.draw_height + (cat.draw_height * (1 - fraction)), 200,
-        //     cat.draw_height);
-        ctx.rotate(-this.slot.angle * Math.PI / 180);
-        ctx.translate(gs * -this.slot.x, gs * -this.slot.y);
-    }
-}
 
 
 // Players
@@ -252,12 +107,12 @@ class Player {
         return Math.pow(this.pointX() - p.pointX(), 2) + Math.pow(this.y - p.y, 2) <= 8000;
     }
 
-    addScore(s) {
+    _addScore(s) {
         this.score += s;
         this.scoreElement.innerHTML = this.score.toFixed();
     }
 
-    update(time) {
+    update(time, width, height, keys) {
         // Controls
 
         if (keys[this.controls.up] && !keys[this.controls.left] && !keys[this.controls.right]
@@ -319,7 +174,7 @@ class Player {
                     });
 
                 if (!hitSomething) {
-                    currentCats.forEach(c => {
+                    Cat.currentCats.forEach(c => {
                         if (Math.pow(c.slot.x - this.pointX(), 2)
                             + Math.pow(c.slot.y - this.pointY(), 2) > 40000) return;
 
@@ -327,11 +182,11 @@ class Player {
 
                         c.patted = true;
                         if (c.cat.name === "fake") {
-                            this.addScore(-30);
+                            this._addScore(-30);
                         } else if(c.cat.name === "fire-cat") {
-                            this.addScore(30);
+                            this._addScore(30);
                         } else {
-                            this.addScore(10);
+                            this._addScore(10);
                         }
                     });
                 }
@@ -389,7 +244,7 @@ class Player {
         }
     }
 
-    draw() {
+    draw(ctx, gs) {
         if (this.patting) {
             ctx.drawImage((this.damaged ? this.assets.damaged : this.assets.normal)["img"],
                 gs * (this.x - 85), gs * (this.y - 85), gs * 170, gs * 170);
@@ -416,13 +271,15 @@ const MAX_CATS = 4;
 let lastFireCat = 0;
 const FIRE_CAT_INTERVAL = 12000;
 
+const FIRE_FRAME_LENGTH = 250;
+
 
 const update = (time) => {
     // Cats
 
-    currentCats.forEach(c => c.update(time));
+    Cat.currentCats.forEach(c => c.update(time));
 
-    if (time - lastCat >= CAT_INTERVAL && currentCats.length < MAX_CATS) {
+    if (time - lastCat >= CAT_INTERVAL && Cat.currentCats.length < MAX_CATS) {
         new Cat(time, false);
         console.log('Create new cat');
         lastCat = time;
@@ -436,17 +293,17 @@ const update = (time) => {
         console.log("Create a fire cat");
         fireCatSlot.occupied = true;
         fireCatSlot.time = time;
-        currentCats.push(new Cat(time, true));
+        Cat.currentCats.push(new Cat(time, true));
     }
 
 
     // Player Updates
 
-    players.forEach(p => p.update(time));
+    players.forEach(p => p.update(time, width, height, keys));
 
 
     // Fire Updates
-    if (time - fireTime > 250) {
+    if (time - fireTime > FIRE_FRAME_LENGTH) {
         fireTime = time;
         // noinspection UnnecessaryLocalVariableJS
         const oldFire = fire;
@@ -467,24 +324,24 @@ const draw = () => {
     ctx.drawImage(assets["fireback"]["img"], gs * 877, gs * 866, gs * 340, gs * 272);
     ctx.drawImage(assets["back" + back.toString()]["img"], gs * 883, gs * 866, gs * 330, gs * 263);
 
-    currentCats.filter(c => c.fireCat).forEach(c => c.draw());
+    Cat.currentCats.filter(c => c.fireCat).forEach(c => c.draw(ctx, gs));
 
     ctx.drawImage(assets["fireplace"]["img"], gs * 630, gs * -20, gs * 832, gs * 1160);
 
-    ctx.drawImage(assets["art" + RANDOM_ART.toString()]["img"], gs * 1690, gs * 260, gs * 480, gs * 337);
+    ctx.drawImage(assets[`art${RANDOM_ART.toString()}`]["img"], gs * 1690, gs * 260, gs * 480, gs * 337);
     ctx.drawImage(assets["frame"]["img"], gs * 1630, gs * 170, gs * 600, gs * 524);
 
 
     // Draw Cats
 
-    currentCats.filter(c => !c.fireCat).forEach(c => c.draw());
+    Cat.currentCats.filter(c => !c.fireCat).forEach(c => c.draw(ctx, gs));
 
 
     // Draw Fore-Background
 
     ctx.drawImage(assets["boombox"]["img"], gs * 930, gs * 478, gs * 250, gs * 164);
 
-    ctx.drawImage(assets["fire" + fire.toString()]["img"], gs * 920, gs * 880, gs * 240, gs * 244);
+    ctx.drawImage(assets[`fire${fire.toString()}`]["img"], gs * 920, gs * 880, gs * 240, gs * 244);
 
     ctx.drawImage(assets["pot"]["img"], gs * 1200, gs * 468, gs * 202, gs * 150);
     ctx.drawImage(assets["other-pot"]["img"], gs * 680, gs * 395, gs * 240, gs * 222);
@@ -499,7 +356,7 @@ const draw = () => {
 
     // Players
 
-    players.forEach(p => p.draw());
+    players.forEach(p => p.draw(ctx, gs));
 
 
     // Scoring
@@ -562,17 +419,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     computeScale();
 
-    for (let img of document.querySelectorAll("div#assets img")) {
+    document.querySelectorAll("div#assets img").forEach(img => {
         assets[img.id] = {};
         assets[img.id]["img"] = img;
         assets[img.id]["w"] = img.width;
         assets[img.id]["h"] = img.height;
-    }
+    });
 
     for (let k in assets) {
         if (!assets.hasOwnProperty(k)) continue;
         if (k.substr(0, 4) === "cat-") {
-            cats.push(new CatType({
+            CatType.allTypes.push(new CatType({
                 asset: assets[k],
                 name: k.substr(4)
             }));
