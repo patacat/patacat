@@ -583,12 +583,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 asset: assets[k],
                 name: k
             });
-
-            // fireCat = {
-            //     asset: assets[k],
-            //     name: k,
-            //     draw_height: 200 * (assets[k]["h"] / assets[k]["w"])
-            // };
         }
     }
 
