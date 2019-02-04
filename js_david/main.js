@@ -155,49 +155,81 @@ class Cat {
 
 // Players
 
-const player1 = {
-    x: 0.25 * width + 50,
-    y: 0.3 * height,
+class Player {
+    constructor(props) {
+        this.x = props.x;
+        this.y = props.y;
 
-    damaged: false,
-    damagedTime: 0,
-    damagedX: 0,
-    damagedY: 0,
+        this.controls = props.controls;
 
-    patting: false,
+        this.damaged = false;
+        this.damagedTime = 0;
+        this.damagedX = 0;
+        this.damagedY = 0;
 
-    v: 0,
-    dir: 0,
+        this.patting = false;
 
-    score: 0,
+        this.v = 0;
+        this.dir = 0;
 
-    addScore: function (s) {
-        this.score += s;
-        player1ScoreEl.innerHTML = this.score.toFixed();
+        this.score = 0;
+        this.scoreElement = props.element;
     }
-};
 
-const player2 = {
-    x: 0.75 * width - 50,
-    y: 0.3 * height,
-
-    damaged: false,
-    damagedTime: 0,
-    damagedX: 0,
-    damagedY: 0,
-
-    patting: false,
-
-    v: 0,
-    dir: 0,
-
-    score: 0,
-
-    addScore: function (s) {
-        this.score += s;
-        player2ScoreEl.innerHTML = this.score.toFixed();
+    update() {
+        if (keys[this.controls.up] && !keys[this.controls.left] && !keys[this.controls.right]
+                && !keys[this.controls.down]) {
+            this.v = Math.min(this.v + ACCEL, MAX_V);
+            this.dir = 90 * Math.PI / 180;
+        } else if (keys[this.controls.up] && keys[this.controls.left] && !keys[this.controls.right]
+                && !keys[this.controls.down]) {
+            this.v = Math.min(this.v + ACCEL, MAX_V);
+            this.dir = 135 * Math.PI / 180;
+        } else if (keys[this.controls.up] && !keys[this.controls.left] && keys[this.controls.right]
+                && !keys[this.controls.down]) {
+            this.v = Math.min(this.v + ACCEL, MAX_V);
+            this.dir = 45 * Math.PI / 180;
+        } else if (!keys[this.controls.up] && !keys[this.controls.left] && !keys[this.controls.right]
+                && keys[this.controls.down]) {
+            this.v = Math.min(this.v + ACCEL, MAX_V);
+            this.dir = 270 * Math.PI / 180;
+        } else if (!keys[this.controls.up] && keys[this.controls.left] && !keys[this.controls.right]
+                && keys[this.controls.down]) {
+            this.v = Math.min(this.v + ACCEL, MAX_V);
+            this.dir = 225 * Math.PI / 180;
+        } else if (!keys[this.controls.up] && !keys[this.controls.left] && keys[this.controls.right]
+                && keys[this.controls.down]) {
+            this.v = Math.min(this.v + ACCEL, MAX_V);
+            this.dir = 315 * Math.PI / 180;
+        } else if (!keys[this.controls.up] && !keys[this.controls.left] && keys[this.controls.right]
+                && !keys[this.controls.down]) {
+            this.v = Math.min(this.v + ACCEL, MAX_V);
+            this.dir = 0;
+        } else if (!keys[this.controls.up] && keys[this.controls.left] && !keys[this.controls.right]
+                && !keys[this.controls.down]) {
+            this.v = Math.min(this.v + ACCEL, MAX_V);
+            this.dir = 180 * Math.PI / 180;
+        } else {
+            if (this.v < 0.01) this.v = 0;
+            else this.v *= 0.8;
+        }
     }
-};
+
+    addScore(s) {
+        this.score += s;
+        this.scoreElement.innerHTML = this.score.toFixed();
+    }
+}
+
+/**
+ * @type Player
+ */
+let player1;
+
+/**
+ * @type Player
+ */
+let player2;
 
 
 const MAX_V = 25;
@@ -238,65 +270,9 @@ const update = (time) => {
     }
 
 
-    // Controls
-
-    if (keys["i"] && !keys["j"] && !keys["l"] && !keys["k"]) {
-        player2.v = Math.min(player2.v + ACCEL, MAX_V);
-        player2.dir = 90 * Math.PI / 180;
-    } else if (keys["i"] && keys["j"] && !keys["l"] && !keys["k"]) {
-        player2.v = Math.min(player2.v + ACCEL, MAX_V);
-        player2.dir = 135 * Math.PI / 180;
-    } else if (keys["i"] && !keys["j"] && keys["l"] && !keys["k"]) {
-        player2.v = Math.min(player2.v + ACCEL, MAX_V);
-        player2.dir = 45 * Math.PI / 180;
-    } else if (!keys["i"] && !keys["j"] && !keys["l"] && keys["k"]) {
-        player2.v = Math.min(player2.v + ACCEL, MAX_V);
-        player2.dir = 270 * Math.PI / 180;
-    } else if (!keys["i"] && keys["j"] && !keys["l"] && keys["k"]) {
-        player2.v = Math.min(player2.v + ACCEL, MAX_V);
-        player2.dir = 225 * Math.PI / 180;
-    } else if (!keys["i"] && !keys["j"] && keys["l"] && keys["k"]) {
-        player2.v = Math.min(player2.v + ACCEL, MAX_V);
-        player2.dir = 315 * Math.PI / 180;
-    } else if (!keys["i"] && !keys["j"] && keys["l"] && !keys["k"]) {
-        player2.v = Math.min(player2.v + ACCEL, MAX_V);
-        player2.dir = 0;
-    } else if (!keys["i"] && keys["j"] && !keys["l"] && !keys["k"]) {
-        player2.v = Math.min(player2.v + ACCEL, MAX_V);
-        player2.dir = 180 * Math.PI / 180;
-    } else {
-        if (player2.v < 0.01) player2.v = 0;
-        else player2.v *= 0.8;
-    }
-
-    if (keys["w"] && !keys["a"] && !keys["d"] && !keys["s"]) {
-        player1.v = Math.min(player1.v + ACCEL, MAX_V);
-        player1.dir = 90 * Math.PI / 180;
-    } else if (keys["w"] && keys["a"] && !keys["d"] && !keys["s"]) {
-        player1.v = Math.min(player1.v + ACCEL, MAX_V);
-        player1.dir = 135 * Math.PI / 180;
-    } else if (keys["w"] && !keys["a"] && keys["d"] && !keys["s"]) {
-        player1.v = Math.min(player1.v + ACCEL, MAX_V);
-        player1.dir = 45 * Math.PI / 180;
-    } else if (!keys["w"] && !keys["a"] && !keys["d"] && keys["s"]) {
-        player1.v = Math.min(player1.v + ACCEL, MAX_V);
-        player1.dir = 270 * Math.PI / 180;
-    } else if (!keys["w"] && keys["a"] && !keys["d"] && keys["s"]) {
-        player1.v = Math.min(player1.v + ACCEL, MAX_V);
-        player1.dir = 225 * Math.PI / 180;
-    } else if (!keys["w"] && !keys["a"] && keys["d"] && keys["s"]) {
-        player1.v = Math.min(player1.v + ACCEL, MAX_V);
-        player1.dir = 315 * Math.PI / 180;
-    } else if (!keys["w"] && !keys["a"] && keys["d"] && !keys["s"]) {
-        player1.v = Math.min(player1.v + ACCEL, MAX_V);
-        player1.dir = 0;
-    } else if (!keys["w"] && keys["a"] && !keys["d"] && !keys["s"]) {
-        player1.v = Math.min(player1.v + ACCEL, MAX_V);
-        player1.dir = 180 * Math.PI / 180;
-    } else {
-        if (player1.v < 0.01) player1.v = 0;
-        else player1.v *= 0.8;
-    }
+    // Player Updates
+    player1.update();
+    player2.update();
 
 
     // Patting
@@ -617,12 +593,37 @@ document.addEventListener("DOMContentLoaded", () => {
     player1ScoreEl = document.getElementById("player1-score-value");
     player2ScoreEl = document.getElementById("player2-score-value");
 
-    window.addEventListener("keyup", e => {
-        keys[e.key] = false;
+    player1 = new Player({
+        x: 0.25 * width + 50,
+        y: 0.3 * height,
+        element: player1ScoreEl,
+
+        controls: {
+            up: "w",
+            down: "s",
+            left: "a",
+            right: "d",
+
+            pat: "e"
+        }
     });
-    window.addEventListener("keydown", e => {
-        keys[e.key] = true;
+    player2 = new Player({
+        x: 0.75 * width - 50,
+        y: 0.3 * height,
+        element: player2ScoreEl,
+
+        controls: {
+            up: "i",
+            down: "k",
+            left: "j",
+            right: "l",
+
+            pat: "o"
+        }
     });
+
+    window.addEventListener("keyup", e => keys[e.key] = false);
+    window.addEventListener("keydown", e => keys[e.key] = true);
 
     window.addEventListener("resize", computeScale);
 
