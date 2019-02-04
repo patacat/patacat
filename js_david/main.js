@@ -43,6 +43,9 @@ let fireCatSlot = {x: 1050, y: 865, angle: 180, occupied: false, time: 0};
 
 const RANDOM_ART = 1 + Math.floor(Math.random() * 4);
 
+/**
+ * @type {Cat[]}
+ */
 let currentCats = [];
 
 let player1ScoreEl;
@@ -122,7 +125,7 @@ class Cat {
                 this.pattedTime = time;
                 this.pattedFrame = 1;
                 let meow = new Audio(meowRetriever.retrieve());
-                meow.play();
+                meow.play().then(() => {});
             } else if (time - this.pattedTime > PAT_FRAME_LENGTH && this.pattedFrame <= 4) {
                 this.pattedTime = time;
                 this.pattedFrame += 1
