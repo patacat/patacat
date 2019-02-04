@@ -82,6 +82,9 @@ class Cat {
         this.entering = true;
         this.leaving = false;
         this.patted = false;
+
+        this._deleted = false;
+
         this.level = 0;
         this.cat = fc ? fireCat : cats[Math.floor(Math.random() * cats.length)];
         this.fireCat = fc;
@@ -109,6 +112,8 @@ class Cat {
     };
 
     update(time) {
+        if (this._deleted) return;
+
         if (this.entering && !this.patted) {
             this.level = Math.min(this.level + 0.1, 1.0);
             if (this.level >= 0.999) {
@@ -133,6 +138,7 @@ class Cat {
                 for (let c in currentCats) {
                     if (!currentCats.hasOwnProperty(c)) continue;
                     if (currentCats[c] === this) {
+                        this._deleted = true;
                         this.slot.occupied = false;
                         currentCats.splice(c, 1);
                     }
@@ -147,8 +153,10 @@ class Cat {
                 for (let c in currentCats) {
                     if (!currentCats.hasOwnProperty(c)) continue;
                     if (currentCats[c] === this) {
+                        this._deleted = true;
                         this.slot.occupied = false;
                         currentCats.splice(c, 1);
+
                     }
                 }
             }
@@ -156,6 +164,7 @@ class Cat {
     }
 
     draw() {
+        if (this._deleted) return;
         drawCatInSlot(this.cat, this.slot, this.level, this.pattedFrame);
     }
 }
