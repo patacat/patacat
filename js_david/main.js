@@ -26,7 +26,12 @@ const meowRetriever = randomRetriever(83, (i) => {
 let canvas;
 let ctx;
 let assets = {};
+
+/**
+ * @type {Cat[]}
+ */
 let cats = [];
+
 let keys = {};
 
 let fireTime = 0;
@@ -155,12 +160,16 @@ class Cat {
 
 // Players
 
+const players = [];
+
 class Player {
     constructor(props) {
         this.x = props.x;
         this.y = props.y;
 
         this.controls = props.controls;
+        this._offsetX = props.point.offsetX;
+        this._offsetY = props.point.offsetY
 
         this.damaged = false;
         this.damagedTime = 0;
@@ -174,9 +183,26 @@ class Player {
 
         this.score = 0;
         this.scoreElement = props.element;
+
+        this.index = players.length;
+        players.push(this);
     }
 
-    update() {
+    pointX() {
+        return this.x + this._offsetX;
+    }
+
+    pointY() {
+        return this.y + this._offsetY;
+    }
+
+    _hitOtherPlayer(p) {
+        return Math.pow(this.pointX() - p.pointX(), 2) + Math.pow(this.y - p.y, 2) <= 8000;
+    }
+
+    update(time) {
+        // Controls
+
         if (keys[this.controls.up] && !keys[this.controls.left] && !keys[this.controls.right]
                 && !keys[this.controls.down]) {
             this.v = Math.min(this.v + ACCEL, MAX_V);
@@ -213,6 +239,77 @@ class Player {
             if (this.v < 0.01) this.v = 0;
             else this.v *= 0.8;
         }
+
+
+        // Patting
+
+        if (!this.patting && keys[this.controls.pat]) {
+            this.patting = true;
+            if (this.pointX() >= 930 && this.pointX() <= 930 + 250
+                    && this.pointY() >= 478 && this.pointY() <= 478 + 164) {
+                // Boombox
+                changeSound();
+            } else {
+                let hitSomething = false;
+                players.filter((p, i) => i !== this.index && this._hitOtherPlayer(p))
+                    .forEach(p => {
+                        hitSomething = true;
+
+                        p.damaged = true;
+                        p.damagedTime = time;
+                        p.damagedX = p.x;
+                        p.damagedY = p.y;
+                    });
+
+                if (!hitSomething) {
+                    currentCats.forEach(c => {
+                        if (Math.pow(c.slot.x - this.pointX(), 2)
+                            + Math.pow(c.slot.y - this.pointY(), 2) <= 40000) {
+                            if (!c.patted) {
+                                c.patted = true;
+                                if (c.cat.name === "fake") {
+                                    this.addScore(-30);
+                                } else if(c.cat.name === "fire-cat") {
+                                    this.addScore(30);
+                                } else {
+                                    this.addScore(10);
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            // if (true) {}
+            // else if (Math.pow(player1.x + 30 - (player2.x - 60), 2)
+            //     + Math.pow(player1.y - player2.y, 2) <= 8000) {
+            //     player2.damaged = true;
+            //     player2.damagedTime = time;
+            //     player2.damagedX = player1.x;
+            //     player2.damagedY = player1.y;
+            // } else {
+            //     currentCats.forEach(c => {
+            //         if (Math.pow(c.slot.x - (player1.x + 30), 2)
+            //             + Math.pow(c.slot.y - (player1.y - 80), 2) <= 40000) {
+            //             if (!c.patted) {
+            //                 c.patted = true;
+            //                 if (c.cat.name === "fake") {
+            //                     player1.addScore(-30);
+            //                 } else if(c.cat.name === "fire-cat") {
+            //                     player1.addScore(30);
+            //                 } else {
+            //                     player1.addScore(10);
+            //                 }
+            //             }
+            //         }
+            //     });
+            // }
+        } else if (this.patting && !keys[this.controls.pat]) {
+            this.patting = false;
+        }
+
+
+        // Movement
     }
 
     addScore(s) {
@@ -271,75 +368,8 @@ const update = (time) => {
 
 
     // Player Updates
-    player1.update();
-    player2.update();
-
-
-    // Patting
-
-    if (!player1.patting && keys["e"]) {
-        player1.patting = true;
-        if (player1.x + 30 >= 930 && player1.x + 30 <= 930 + 250
-                && player1.y - 80 >= 478 && player1.y - 80 <= 478 + 164) {
-            changeSound();
-        } else if (Math.pow(player1.x + 30 - (player2.x - 60), 2)
-                + Math.pow(player1.y - player2.y, 2) <= 8000) {
-            player2.damaged = true;
-            player2.damagedTime = time;
-            player2.damagedX = player1.x;
-            player2.damagedY = player1.y;
-        } else {
-            currentCats.forEach(c => {
-                if (Math.pow(c.slot.x - (player1.x + 30), 2)
-                    + Math.pow(c.slot.y - (player1.y - 80), 2) <= 40000) {
-                    if (!c.patted) {
-                        c.patted = true;
-                        if (c.cat.name === "fake") {
-                            player1.addScore(-30);
-                        } else if(c.cat.name === "fire-cat") {
-                            player1.addScore(30);
-                        } else {
-                            player1.addScore(10);
-                        }
-                    }
-                }
-            });
-        }
-    } else if (player1.patting && !keys["e"]) {
-        player1.patting = false;
-    }
-
-    if (!player2.patting && keys["o"]) {
-        player2.patting = true;
-        if (player2.x - 60 >= 930 && player2.x - 60 <= 930 + 250
-            && player2.y - 80 >= 478 && player2.y - 80 <= 478 + 164) {
-            changeSound();
-        } else if (Math.pow(player1.x + 30 - (player2.x - 60), 2)
-                + Math.pow(player1.y - player2.y, 2) <= 7000) {
-            player1.damaged = true;
-            player1.damagedTime = time;
-            player1.damagedX = player1.x;
-            player1.damagedY = player1.y;
-        } else {
-            currentCats.forEach(c => {
-                if (Math.pow(c.slot.x - (player2.x + 30), 2)
-                    + Math.pow(c.slot.y - (player2.y - 80), 2) <= 40000) {
-                    if (!c.patted) {
-                        c.patted = true;
-                        if (c.cat.name === "fake") {
-                            player2.addScore(-30);
-                        } else if(c.cat.name === "fire-cat") {
-                            player1.addScore(30);
-                        } else {
-                            player2.addScore(10);
-                        }
-                    }
-                }
-            });
-        }
-    } else if (player2.patting && !keys["o"]) {
-        player2.patting = false;
-    }
+    player1.update(time);
+    player2.update(time);
 
 
     // Update positions
@@ -605,6 +635,11 @@ document.addEventListener("DOMContentLoaded", () => {
             right: "d",
 
             pat: "e"
+        },
+
+        point: {
+            offsetX: 30,
+            offsetY: -80
         }
     });
     player2 = new Player({
@@ -619,6 +654,11 @@ document.addEventListener("DOMContentLoaded", () => {
             right: "l",
 
             pat: "o"
+        },
+
+        point: {
+            offsetX: -60,
+            offsetY: -80
         }
     });
 
