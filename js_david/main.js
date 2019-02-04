@@ -119,6 +119,8 @@ class Cat {
             if (this.level >= 0.999) {
                 this.entering = false;
             }
+
+            return;
         }
 
         if (time - this.initialTime > CAT_LENGTH && !this.patted) {
@@ -137,13 +139,15 @@ class Cat {
             } else if (time - this.pattedTime > PAT_FRAME_LENGTH && this.pattedFrame === 5) {
                 for (let c in currentCats) {
                     if (!currentCats.hasOwnProperty(c)) continue;
-                    if (currentCats[c] === this) {
-                        this._deleted = true;
-                        this.slot.occupied = false;
-                        currentCats.splice(c, 1);
-                    }
+                    if (currentCats[c] !== this) continue;
+
+                    this._deleted = true;
+                    this.slot.occupied = false;
+                    currentCats.splice(c, 1);
                 }
             }
+
+            return;
         }
 
         if (this.leaving && !this.patted) {
@@ -152,12 +156,11 @@ class Cat {
                 // TODO: DELETE
                 for (let c in currentCats) {
                     if (!currentCats.hasOwnProperty(c)) continue;
-                    if (currentCats[c] === this) {
-                        this._deleted = true;
-                        this.slot.occupied = false;
-                        currentCats.splice(c, 1);
+                    if (currentCats[c] !== this) continue;
 
-                    }
+                    this._deleted = true;
+                    this.slot.occupied = false;
+                    currentCats.splice(c, 1);
                 }
             }
         }
@@ -165,7 +168,18 @@ class Cat {
 
     draw() {
         if (this._deleted) return;
-        drawCatInSlot(this.cat, this.slot, this.level, this.pattedFrame);
+
+        ctx.translate(gs * this.slot.x, gs * this.slot.y);
+        ctx.rotate(this.slot.angle * Math.PI / 180);
+        if (this.pattedFrame === 0) {
+            // ctx.fillRect(gs * -100, gs * (-cat.draw_height + (cat.draw_height * (1 - fraction))), gs * 200, gs * cat.draw_height);
+            ctx.drawImage(this.cat.asset["img"], gs * -100, gs * (-this.cat.draw_height + (this.cat.draw_height * (1 - this.level))), gs * 200, gs * this.cat.draw_height);
+        } else if (this.pattedFrame < 5) {
+            ctx.drawImage(assets["poof" + this.pattedFrame.toString()]["img"], gs * -80, gs * (-100 - (10 * this.pattedFrame) + (80 * (1 - this.level))), gs * 160, gs * 160);
+        }
+        // ctx.drawImage(assets["couch"]["img"], 0, -cat.draw_height + (cat.draw_height * (1 - fraction)), 200, cat.draw_height);
+        ctx.rotate(-this.slot.angle * Math.PI / 180);
+        ctx.translate(gs * -this.slot.x, gs * -this.slot.y);
     }
 }
 
@@ -326,14 +340,14 @@ class Player {
             } else if (this.y > this.damagedY) {
                 this.y -= Math.abs(this.y - this.damagedY) * 0.2;
             }
-        }
 
 
-        // Update Damage Status
+            // Update Damage Status
 
-        if (time - this.damagedTime > DAMAGED_LENGTH) {
-            this.damaged = false;
-            this.damagedTime = 0;
+            if (time - this.damagedTime > DAMAGED_LENGTH) {
+                this.damaged = false;
+                this.damagedTime = 0;
+            }
         }
 
 
@@ -344,26 +358,25 @@ class Player {
                 if (!this.controls.hasOwnProperty(k)) continue;
                 keys[this.controls[k]] = false;
             }
-        }
 
-        if (this.x < 100 || this.y < 100 || this.x > width - 100 || this.y > height - 100) {
             this.dir = this.dir - Math.PI;
-        }
 
-        if (this.x < 100) this.x = 100;
-        if (this.y < 100) this.y = 100;
-        if (this.x > width - 100) this.x = width - 100;
-        if (this.y > height - 100) this.y = height - 100;
+            if (this.x < 100) this.x = 100;
+            if (this.y < 100) this.y = 100;
+            if (this.x > width - 100) this.x = width - 100;
+            if (this.y > height - 100) this.y = height - 100;
+        }
     }
 
     draw() {
         if (this.patting) {
             ctx.drawImage((this.damaged ? this.assets.damaged : this.assets.normal)["img"],
                 gs * (this.x - 85), gs * (this.y - 85), gs * 170, gs * 170);
-        } else {
-            ctx.drawImage((this.damaged ? this.assets.damaged : this.assets.normal)["img"],
-                gs * (this.x - 100), gs * (this.y - 100), gs * 200, gs * 200);
+            return;
         }
+
+        ctx.drawImage((this.damaged ? this.assets.damaged : this.assets.normal)["img"],
+            gs * (this.x - 100), gs * (this.y - 100), gs * 200, gs * 200);
     }
 }
 
@@ -432,20 +445,6 @@ const update = (time) => {
         const oldBack = back;
         while (back === oldBack) back = Math.round(1 + Math.random() * 3);
     }
-};
-
-const drawCatInSlot = (cat, slot, fraction, pattedFrame) => {
-    ctx.translate(gs * slot.x, gs * slot.y);
-    ctx.rotate(slot.angle * Math.PI / 180);
-    if (pattedFrame === 0) {
-        // ctx.fillRect(gs * -100, gs * (-cat.draw_height + (cat.draw_height * (1 - fraction))), gs * 200, gs * cat.draw_height);
-        ctx.drawImage(cat.asset["img"], gs * -100, gs * (-cat.draw_height + (cat.draw_height * (1 - fraction))), gs * 200, gs * cat.draw_height);
-    } else if (pattedFrame < 5) {
-        ctx.drawImage(assets["poof" + pattedFrame.toString()]["img"], gs * -80, gs * (-100 - (10 * pattedFrame) + (80 * (1 - fraction))), gs * 160, gs * 160);
-    }
-    // ctx.drawImage(assets["couch"]["img"], 0, -cat.draw_height + (cat.draw_height * (1 - fraction)), 200, cat.draw_height);
-    ctx.rotate(-slot.angle * Math.PI / 180);
-    ctx.translate(gs * -slot.x, gs * -slot.y);
 };
 
 const draw = () => {
