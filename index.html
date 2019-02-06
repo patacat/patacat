@@ -49,6 +49,12 @@
             /*height: 675px;*/
         }
 
+        canvas#hud-canvas {
+            position: fixed;
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: 3;
+        }
+
         span#player1-score, span#player2-score {
             position: fixed;
             z-index: 99;
@@ -150,5 +156,6 @@
 <span id="player2-score">Player 2: <span id="player2-score-value">0</span></span>
 <canvas id="background-canvas"></canvas>
 <canvas id="main-canvas"></canvas>
+<canvas id="hud-canvas"></canvas>
 </body>
 </html>

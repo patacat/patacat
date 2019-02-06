@@ -27,6 +27,9 @@ let ctx;
 let backgroundCanvas;
 let backgroundContext;
 
+let hudCanvas;
+let hudContext;
+
 let assets = {};
 
 let keys = {};
@@ -140,12 +143,6 @@ const draw = () => {
     // Players
 
     Player.players.forEach(p => p.draw(ctx, gs));
-
-
-    // Scoring
-
-    ctx.drawImage(assets["coin"]["img"], gs * (width - 950), gs * 50, gs * 100, gs * 100);
-    ctx.drawImage(assets["coin"]["img"], gs * (width - 500), gs * 50, gs * 100, gs * 100);
 };
 
 
@@ -170,6 +167,16 @@ const drawBackground = () => {
     }
     backgroundContext.drawImage(assets["floor"]["img"], gs * -30, gs * (height - 340), gs * 3101, gs * 400);
     backgroundContext.drawImage(assets["fireback"]["img"], gs * 877, gs * 866, gs * 340, gs * 272);
+};
+
+
+const drawHUD = () => {
+    hudContext.clearRect(0, 0, hudCanvas.width, hudCanvas.height);
+
+    // Scoring
+
+    hudContext.drawImage(assets["coin"]["img"], gs * (width - 950), gs * 50, gs * 100, gs * 100);
+    hudContext.drawImage(assets["coin"]["img"], gs * (width - 500), gs * 50, gs * 100, gs * 100);
 };
 
 
@@ -202,17 +209,29 @@ const computeScale = () => {
     }
     console.log(`Global scaler ${gs}, w ${w} h ${h}`);
 
+    // Background Canvas
+
     backgroundCanvas.width = w * scale;
     backgroundCanvas.height = height * gs;
 
     backgroundCanvas.style.width = `${w}px`;
     backgroundCanvas.style.height = `${height * gs / scale}px`;
 
+    // Main Game Canvas
+
     canvas.width = width * gs;
     canvas.height = height * gs;
 
     canvas.style.width = `${width * gs / scale}px`;
     canvas.style.height = `${height * gs / scale}px`;
+
+    // HUD Canvas
+
+    hudCanvas.width = w * scale;
+    hudCanvas.height = height * gs;
+
+    hudCanvas.style.width = `${w}px`;
+    hudCanvas.style.height = `${height * gs / scale}px`;
 
 
     // Reposition scores
@@ -230,6 +249,7 @@ const computeScale = () => {
 const updateWindowSize = () => {
     computeScale();
     drawBackground();
+    drawHUD();
 };
 
 
@@ -237,10 +257,13 @@ const updateWindowSize = () => {
 
 document.addEventListener("DOMContentLoaded", () => {
     backgroundCanvas = document.getElementById("background-canvas");
-    backgroundContext = backgroundCanvas.getContext("2d");
+    backgroundContext = backgroundCanvas.getContext("2d", { alpha: false });
 
     canvas = document.getElementById("main-canvas");
     ctx = canvas.getContext("2d");
+
+    hudCanvas = document.getElementById("hud-canvas");
+    hudContext = hudCanvas.getContext("2d");
 
     computeScale();
 
@@ -325,11 +348,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("resize", updateWindowSize);
 
-    assets["wallpaper"]["img"].addEventListener("load", updateWindowSize);
-    assets["floor"]["img"].addEventListener("load", updateWindowSize);
+    assets["wallpaper"]["img"].addEventListener("load", drawBackground);
+    assets["floor"]["img"].addEventListener("load", drawBackground);
+
+    assets["coin"]["img"].addEventListener("load", drawHUD);
 
     playNewSong();
 
     drawBackground();
+    drawHUD();
+
     gameLoop();
 });
