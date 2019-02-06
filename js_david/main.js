@@ -187,13 +187,13 @@ const playNewSong = () => {
     currentSong = new Audio(newSong);
     currentSong.play().catch(err => {
         console.log(`Could not start song (Error: ${err})`);
-          const workaround = () => {
-              new Audio(songRetriever.retrieve()).play()
+        const workaround = () => {
+            new Audio(songRetriever.retrieve()).play()
                 .then(() => document.removeEventListener('keydown', workaround))
                 .catch(err => {
-                  console.error(`Tried again, still can't start song (Error: ${err})`);
-              });
-          };
+                    console.error(`Tried again, still can't start song (Error: ${err})`);
+                });
+        };
         document.addEventListener('keydown', workaround);
     });
     currentSong.addEventListener("ended", playNewSong);
