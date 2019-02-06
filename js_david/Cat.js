@@ -97,7 +97,7 @@ class Cat {
 
 				0, 0,
 				this.cat.sourceW,
-				this.cat.sourceH * this.level,
+				Math.max(this.cat.sourceH * this.level, 1),
 
 				gs * -100,
 				gs * (-this.cat.drawHeight + (this.cat.drawHeight * (1 - this.level))),

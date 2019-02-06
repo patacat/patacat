@@ -325,6 +325,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("resize", updateWindowSize);
 
+    assets["wallpaper"]["img"].addEventListener("load", updateWindowSize);
+    assets["floor"]["img"].addEventListener("load", updateWindowSize);
+
     playNewSong();
 
     drawBackground();
