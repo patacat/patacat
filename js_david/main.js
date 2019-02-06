@@ -23,6 +23,10 @@ let currentSong = null;
 
 let canvas;
 let ctx;
+
+let backgroundCanvas;
+let backgroundContext;
+
 let assets = {};
 
 let keys = {};
@@ -53,30 +57,8 @@ let width = 2560; // TODO
 let height = 1350; // TODO
 
 
-const CAT_LENGTH = 2200;
-
-
-const PAT_FRAME_LENGTH = 100;
-
-
-const DAMAGED_LENGTH = 1500;
-
-
-const MAX_V = 25;
-const ACCEL = 1;
-
-
-const CAT_INTERVAL = 1000;
-
-
 let lastCat = 0;
-
-const MAX_CATS = 4;
-
 let lastFireCat = 0;
-const FIRE_CAT_INTERVAL = 12000;
-
-const FIRE_FRAME_LENGTH = 250;
 
 
 const update = (time) => {
@@ -123,10 +105,6 @@ const update = (time) => {
 const draw = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.drawImage(assets["wallpaper"]["img"], 0, 0, gs * 2883, gs * 1350);
-    ctx.drawImage(assets["floor"]["img"], gs * -30, gs * (height - 340), gs * 3101, gs * 400);
-
-    ctx.drawImage(assets["fireback"]["img"], gs * 877, gs * 866, gs * 340, gs * 272);
     ctx.drawImage(assets["back" + back.toString()]["img"], gs * 883, gs * 866, gs * 330, gs * 263);
 
     Cat.currentCats.filter(c => c.fireCat).forEach(c => c.draw(ctx, gs));
@@ -181,6 +159,20 @@ const gameLoop = () => {
 };
 
 
+const getViewportWidth = () => Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+const getViewportHeight = () => Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+
+
+const drawBackground = () => {
+    backgroundContext.clearRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
+    for (let i = 0; i < Math.ceil(getViewportWidth() / (backgroundCanvas.width * gs / scale)); i++) {
+        backgroundContext.drawImage(assets["wallpaper"]["img"], i * 2883 * gs, 0, gs * 2883, gs * 1350);
+    }
+    backgroundContext.drawImage(assets["floor"]["img"], gs * -30, gs * (height - 340), gs * 3101, gs * 400);
+    backgroundContext.drawImage(assets["fireback"]["img"], gs * 877, gs * 866, gs * 340, gs * 272);
+};
+
+
 const playNewSong = () => {
     const newSong = songRetriever.retrieve();
     console.log(`Changing song to ${newSong}`);
@@ -201,14 +193,20 @@ const playNewSong = () => {
 };
 
 const computeScale = () => {
-    const w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-    const h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+    const w = getViewportWidth();
+    const h = getViewportHeight();
 
     gs = Math.min(w / width, h / height) * scale;
     if (gs === 0) {
         gs = scale;
     }
     console.log(`Global scaler ${gs}, w ${w} h ${h}`);
+
+    backgroundCanvas.width = w * scale;
+    backgroundCanvas.height = height * gs;
+
+    backgroundCanvas.style.width = `${w}px`;
+    backgroundCanvas.style.height = `${height * gs / scale}px`;
 
     canvas.width = width * gs;
     canvas.height = height * gs;
@@ -229,9 +227,18 @@ const computeScale = () => {
 };
 
 
+const updateWindowSize = () => {
+    computeScale();
+    drawBackground();
+};
+
+
 // Initialize!
 
 document.addEventListener("DOMContentLoaded", () => {
+    backgroundCanvas = document.getElementById("background-canvas");
+    backgroundContext = backgroundCanvas.getContext("2d");
+
     canvas = document.getElementById("main-canvas");
     ctx = canvas.getContext("2d");
 
@@ -316,9 +323,10 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("keyup", e => keys[e.key] = false);
     window.addEventListener("keydown", e => keys[e.key] = true);
 
-    window.addEventListener("resize", computeScale);
+    window.addEventListener("resize", updateWindowSize);
 
     playNewSong();
 
+    drawBackground();
     gameLoop();
 });
