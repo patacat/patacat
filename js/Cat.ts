@@ -10,7 +10,7 @@ class Cat implements CanvasItem {
     cat: CatType;
     fireCat: boolean;
     initialTime: number;
-    slot: any;
+    slot: Slot;
 
     static currentCats: Cat[] = [];
 

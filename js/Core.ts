@@ -1,3 +1,9 @@
+/**
+ * Todo change
+ * I believe all canvas items should have a unified interface, and that update & draw
+ * should take in a list of items and map all the operations.
+ * Right now the calls differ per item
+ */
 interface CanvasItem {
     /**
      * Called per frame with the current update time

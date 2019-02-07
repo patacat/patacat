@@ -1,6 +1,11 @@
+type CatTypeProps = {
+	asset: AssetImg
+	name: string
+}
+
 class CatType {
 
-	asset: any;
+	asset: AssetImg;
 	name: string;
 	sourceW: number;
 	sourceH: number;
@@ -8,12 +13,12 @@ class CatType {
 
 	static allTypes: CatType[] = [];
 
-	constructor(props) {
+	constructor(props: CatTypeProps) {
 		this.asset = props.asset;
 		this.name = props.name;
 
-		this.sourceW = this.asset["w"];
-		this.sourceH = this.asset["h"];
+		this.sourceW = this.asset.w;
+		this.sourceH = this.asset.h;
 
 		this.drawHeight = 200 * (this.sourceH / this.sourceW);
 	}

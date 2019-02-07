@@ -260,3 +260,63 @@ document.addEventListener("DOMContentLoaded", function () {
     drawHUD();
     gameLoop();
 });
+assets: {
+    normal: assets["player1"],
+        damaged;
+    assets["player1-damaged"];
+}
+x: 0.25 * width + 50,
+    y;
+0.3 * height,
+    element;
+document.getElementById("player1-score-value"),
+    controls;
+{
+    up: "w",
+        down;
+    "s",
+        left;
+    "a",
+        right;
+    "d",
+        pat;
+    "e";
+}
+point: {
+    offsetX: 30,
+        offsetY;
+    -80;
+}
+;
+// Player 2
+new Player({
+    assets: {
+        normal: assets["player2"],
+        damaged: assets["player2-damaged"]
+    },
+    x: 0.75 * width - 50,
+    y: 0.3 * height,
+    element: document.getElementById("player2-score-value"),
+    controls: {
+        up: "i",
+        down: "k",
+        left: "j",
+        right: "l",
+        pat: "o"
+    },
+    point: {
+        offsetX: -60,
+        offsetY: -80
+    }
+});
+window.addEventListener("keyup", function (e) { return keys[e.key] = false; });
+window.addEventListener("keydown", function (e) { return keys[e.key] = true; });
+window.addEventListener("resize", updateWindowSize);
+assets["wallpaper"].img.addEventListener("load", drawBackground);
+assets["floor"].img.addEventListener("load", drawBackground);
+assets["coin"].img.addEventListener("load", drawHUD);
+playNewSong();
+drawBackground();
+drawHUD();
+gameLoop();
+;

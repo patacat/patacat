@@ -6,18 +6,23 @@ type Controls = {
 	pat: string;
 }
 
+type PlayerAssets = {
+	normal: AssetImg;
+	damaged: AssetImg;
+}
+
 type PlayerProps = {
 	x: number;
 	y: number;
-	assets: any;
-	element: HTMLElement
-	controls: Controls
-	point: Point
+	assets: PlayerAssets;
+	element: HTMLElement;
+	controls: Controls;
+	point: Point;
 }
 
 class Player {
 
-	assets: any;
+	assets: PlayerAssets;
 	x: number;
 	y: number;
 	controls: Controls;
