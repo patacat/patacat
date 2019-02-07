@@ -8,7 +8,9 @@ deploy:
     branch: enhancement/travis
 before_script:
   - npm install
-script: tsc
+script:
+  - chmod +x gh-pages.sh
+  - ./gh-pages.sh
 branches:
   except:
     - gh-pages
