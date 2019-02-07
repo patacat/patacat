@@ -2,14 +2,18 @@
 let gs = 1.0;
 const scale = window.devicePixelRatio;
 
-function randomRetriever(count, creator) {
-    const options = [];
+type Retriever = {
+    retrieve(): string
+}
+
+function randomRetriever(count: number, creator: (number) => string): Retriever {
+    const options: string[] = [];
     for (let i = 0; i < count; i++) {
         options.push(creator(i));
     }
     let current = 0;
     return {
-        retrieve: function () {
+        retrieve: () => {
             current = (current + 1 + Math.floor(Math.random() * (options.length - 1))) % options.length;
             return options[current];
         }
@@ -19,31 +23,31 @@ function randomRetriever(count, creator) {
 const songRetriever = randomRetriever(23, i => `assets/songs/${i + 1}.mp3`);
 const meowRetriever = randomRetriever(83, i => `assets/meows/${i + 1}.m4a`);
 
-let currentSong = null;
+let currentSong: HTMLAudioElement | null = null;
 
-let canvas;
-let ctx;
+let canvas: HTMLCanvasElement;
+let ctx: CanvasRenderingContext2D;
 
-let backgroundCanvas;
-let backgroundContext;
+let backgroundCanvas: HTMLCanvasElement;
+let backgroundContext: CanvasRenderingContext2D;
 
 let hudCanvas;
 let hudContext;
 
-let assets = {};
+let assets: Record<string, AssetImg> = {};
 
-let keys = {};
+let keys: Record<string, boolean | null> = {};
 
 let fireTime = 0;
 let fire = 1;
 let back = 1;
 
-let fireCat = null;
-let fireCatSlot = {x: 1050, y: 865, angle: 180, occupied: false, time: 0};
+let fireCat: CatType | null = null;
+let fireCatSlot: FireSlot = {x: 1050, y: 865, angle: 180, occupied: false, time: 0};
 
 const RANDOM_ART = 1 + Math.floor(Math.random() * 4);
 
-const SLOTS = [
+const SLOTS: Slot[] = [
     {x: 450, y: 760, angle: 0, occupied: false},
     {x: 600, y: 880, angle: 73, occupied: false},
 
@@ -105,17 +109,17 @@ const update = (time) => {
     }
 };
 
-const draw = () => {
+const draw = (time) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.drawImage(assets["back" + back.toString()]["img"], gs * 883, gs * 866, gs * 330, gs * 263);
+    ctx.drawImage(assets["back" + back.toString()].img, gs * 883, gs * 866, gs * 330, gs * 263);
 
     Cat.currentCats.filter(c => c.fireCat).forEach(c => c.draw(ctx, gs));
 
-    ctx.drawImage(assets["fireplace"]["img"], gs * 630, gs * -20, gs * 832, gs * 1160);
+    ctx.drawImage(assets["fireplace"].img, gs * 630, gs * -20, gs * 832, gs * 1160);
 
-    ctx.drawImage(assets[`art${RANDOM_ART.toString()}`]["img"], gs * 1690, gs * 260, gs * 480, gs * 337);
-    ctx.drawImage(assets["frame"]["img"], gs * 1630, gs * 170, gs * 600, gs * 524);
+    ctx.drawImage(assets[`art${RANDOM_ART.toString()}`].img, gs * 1690, gs * 260, gs * 480, gs * 337);
+    ctx.drawImage(assets["frame"].img, gs * 1630, gs * 170, gs * 600, gs * 524);
 
 
     // Draw Cats
@@ -125,19 +129,19 @@ const draw = () => {
 
     // Draw Fore-Background
 
-    ctx.drawImage(assets["boombox"]["img"], gs * 930, gs * 478, gs * 250, gs * 164);
+    ctx.drawImage(assets["boombox"].img, gs * 930, gs * 478, gs * 250, gs * 164);
 
-    ctx.drawImage(assets[`fire${fire.toString()}`]["img"], gs * 920, gs * 880, gs * 240, gs * 244);
+    ctx.drawImage(assets[`fire${fire.toString()}`].img, gs * 920, gs * 880, gs * 240, gs * 244);
 
-    ctx.drawImage(assets["pot"]["img"], gs * 1200, gs * 468, gs * 202, gs * 150);
-    ctx.drawImage(assets["other-pot"]["img"], gs * 680, gs * 395, gs * 240, gs * 222);
+    ctx.drawImage(assets["pot"].img, gs * 1200, gs * 468, gs * 202, gs * 150);
+    ctx.drawImage(assets["other-pot"].img, gs * 680, gs * 395, gs * 240, gs * 222);
 
-    ctx.drawImage(assets["lamp"]["img"], gs * 2090, gs * 300, gs * 270, gs * 900);
+    ctx.drawImage(assets["lamp"].img, gs * 2090, gs * 300, gs * 270, gs * 900);
 
-    ctx.drawImage(assets["plant"]["img"], gs * 20, gs * 680, gs * 245, gs * 500);
+    ctx.drawImage(assets["plant"].img, gs * 20, gs * 680, gs * 245, gs * 500);
 
-    ctx.drawImage(assets["couch"]["img"], gs * 200, gs * 730, gs * 508, gs * 450);
-    ctx.drawImage(assets["large-couch"]["img"], gs * 1400, gs * 820, gs * 1000, gs * 366);
+    ctx.drawImage(assets["couch"].img, gs * 200, gs * 730, gs * 508, gs * 450);
+    ctx.drawImage(assets["large-couch"].img, gs * 1400, gs * 820, gs * 1000, gs * 366);
 
 
     // Players
@@ -163,10 +167,10 @@ const getViewportHeight = () => Math.max(document.documentElement.clientHeight, 
 const drawBackground = () => {
     backgroundContext.clearRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
     for (let i = 0; i < Math.ceil(getViewportWidth() / (backgroundCanvas.width * gs / scale)); i++) {
-        backgroundContext.drawImage(assets["wallpaper"]["img"], i * 2883 * gs, 0, gs * 2883, gs * 1350);
+        backgroundContext.drawImage(assets["wallpaper"].img, i * 2883 * gs, 0, gs * 2883, gs * 1350);
     }
-    backgroundContext.drawImage(assets["floor"]["img"], gs * -30, gs * (height - 340), gs * 3101, gs * 400);
-    backgroundContext.drawImage(assets["fireback"]["img"], gs * 877, gs * 866, gs * 340, gs * 272);
+    backgroundContext.drawImage(assets["floor"].img, gs * -30, gs * (height - 340), gs * 3101, gs * 400);
+    backgroundContext.drawImage(assets["fireback"].img, gs * 877, gs * 866, gs * 340, gs * 272);
 };
 
 
@@ -175,8 +179,8 @@ const drawHUD = () => {
 
     // Scoring
 
-    hudContext.drawImage(assets["coin"]["img"], gs * (width - 950), gs * 50, gs * 100, gs * 100);
-    hudContext.drawImage(assets["coin"]["img"], gs * (width - 500), gs * 50, gs * 100, gs * 100);
+    hudContext.drawImage(assets["coin"].img, gs * (width - 950), gs * 50, gs * 100, gs * 100);
+    hudContext.drawImage(assets["coin"].img, gs * (width - 500), gs * 50, gs * 100, gs * 100);
 };
 
 
@@ -236,11 +240,11 @@ const computeScale = () => {
 
     // Reposition scores
 
-    const score1 = document.getElementById('player1-score');
+    const score1 = <HTMLElement>document.getElementById('player1-score');
     score1.style.left = `${gs / scale * (width - 950 + 120)}px`;
     score1.style.top = `${gs / scale * 50 + score1.offsetHeight * gs / scale}px`;
 
-    const score2 = document.getElementById('player2-score');
+    const score2 = <HTMLElement>document.getElementById('player2-score');
     score2.style.left = `${gs / scale * (width - 500 + 120)}px`;
     score2.style.top = `${gs / scale * 50 + score1.offsetHeight * gs / scale}px`;
 };
@@ -256,22 +260,24 @@ const updateWindowSize = () => {
 // Initialize!
 
 document.addEventListener("DOMContentLoaded", () => {
-    backgroundCanvas = document.getElementById("background-canvas");
-    backgroundContext = backgroundCanvas.getContext("2d", { alpha: false });
+    backgroundCanvas = <HTMLCanvasElement>document.getElementById("background-canvas");
+    backgroundContext = <CanvasRenderingContext2D>backgroundCanvas.getContext("2d", {alpha: false});
 
-    canvas = document.getElementById("main-canvas");
-    ctx = canvas.getContext("2d");
+    canvas = <HTMLCanvasElement>document.getElementById("main-canvas");
+    ctx = <CanvasRenderingContext2D>canvas.getContext("2d");
 
     hudCanvas = document.getElementById("hud-canvas");
     hudContext = hudCanvas.getContext("2d");
 
     computeScale();
 
-    document.querySelectorAll("div#assets img").forEach(img => {
-        assets[img.id] = {};
-        assets[img.id]["img"] = img;
-        assets[img.id]["w"] = img.width;
-        assets[img.id]["h"] = img.height;
+    document.querySelectorAll("div#assets img").forEach(el => {
+        const img = <HTMLCanvasElement>el;
+        assets[img.id] = {
+            img: img,
+            w: img.width,
+            h: img.height
+        };
     });
 
     for (let k in assets) {
@@ -300,7 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         x: 0.25 * width + 50,
         y: 0.3 * height,
-        element: document.getElementById("player1-score-value"),
+        element: <HTMLElement>document.getElementById("player1-score-value"),
 
         controls: {
             up: "w",
@@ -326,7 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         x: 0.75 * width - 50,
         y: 0.3 * height,
-        element: document.getElementById("player2-score-value"),
+        element: <HTMLElement>document.getElementById("player2-score-value"),
 
         controls: {
             up: "i",
@@ -348,10 +354,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("resize", updateWindowSize);
 
-    assets["wallpaper"]["img"].addEventListener("load", drawBackground);
-    assets["floor"]["img"].addEventListener("load", drawBackground);
+    assets["wallpaper"].img.addEventListener("load", drawBackground);
+    assets["floor"].img.addEventListener("load", drawBackground);
 
-    assets["coin"]["img"].addEventListener("load", drawHUD);
+    assets["coin"].img.addEventListener("load", drawHUD);
 
     playNewSong();
 

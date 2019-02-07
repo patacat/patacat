@@ -3,7 +3,6 @@
     "target": "es5",
     "allowJs": true,
     "skipLibCheck": true,
-    //    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
