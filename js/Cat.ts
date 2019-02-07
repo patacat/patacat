@@ -18,7 +18,7 @@ class Cat implements CanvasItem {
         /**
          * @type {CatType}
          */
-        this.cat = fc ? fireCat : CatType.allTypes[Math.floor(Math.random() * CatType.allTypes.length)];
+        this.cat = fc ? fireCat! : CatType.allTypes[Math.floor(Math.random() * CatType.allTypes.length)];
 
         this.fireCat = fc;
 

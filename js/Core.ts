@@ -19,7 +19,7 @@ type Point = {
 }
 
 type AssetImg = {
-    img: CanvasImageSource & HTMLElement
+    img: HTMLCanvasElement
     w: number
     h: number
 }
