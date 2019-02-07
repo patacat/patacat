@@ -1,3 +1,4 @@
+language: node_js
 deploy:
   provider: pages
   skip-cleanup: true
@@ -5,5 +6,11 @@ deploy:
   keep-history: false
   on:
     branch: gh-pages
+before_script:
+  - npm install
+script: tsc
+branches:
+  except:
+    - gh-pages
 notifications:
   email: false
