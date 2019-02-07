@@ -1,0 +1,20 @@
+language: node_js
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+  keep-history: false
+  on:
+    branch: master
+before_script:
+  - npm install
+script:
+  - chmod +x gh-pages.sh
+  - ./gh-pages.sh
+branches:
+  except:
+    - gh-pages
+notifications:
+  email: false
+cache: npm
+

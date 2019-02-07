@@ -1,0 +1,6 @@
+# Specific to gh-pages
+
+.idea/
+.DS_Store
+package-lock.json
+node_modules/

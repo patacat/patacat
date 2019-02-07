@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Pat-a-Cat</title>
+
+    <meta charset="utf-8">
+
+    <script src="js/Github.js"></script>
+    <script src="js/Core.js"></script>
+    <script src="js/CatType.js" defer></script>
+    <script src="js/Cat.js" defer></script>
+    <script src="js/Player.js" defer></script>
+    <script src="js/Main.js" defer></script>
+
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            margin: 0;
+            padding: 0;
+
+            font-family: "CatPat", sans-serif;
+            position: fixed;
+            z-index: 99;
+            top: 30px;
+            left: 30px;
+
+            color: rgba(100, 50, 80, 0.5);
+        }
+
+        div#assets {
+            display: none;
+        }
+
+        canvas#background-canvas {
+            position: fixed;
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: 1;
+        }
+
+        canvas#main-canvas {
+            position: fixed;
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: 2;
+
+            /*width: 1280px;*/
+            /*height: 675px;*/
+        }
+
+        canvas#hud-canvas {
+            position: fixed;
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: 3;
+        }
+
+        span#player1-score, span#player2-score {
+            position: fixed;
+            z-index: 99;
+            top: 38px;
+
+            font-family: "CatPat", sans-serif;
+            font-size: 1.3rem;
+            color: rgba(10, 5, 0, 0.6);
+        }
+
+        span#player1-score-value, span#player2-score-value {
+            color: rgba(10, 5, 0, 0.8);
+            margin-left: 0.2em;
+        }
+
+        /*span#player1-score {*/
+            /*left: calc(100% - 410px);*/
+        /*}*/
+
+        /*span#player2-score {*/
+            /*left: calc(100% - 185px);*/
+        /*}*/
+
+        @font-face {
+            font-family: "CatPat";
+            src: url("assets/Myfont-Regular.ttf") format("truetype"),
+                 url("assets/Myfont-Regular.otf") format("otf");
+        }
+    </style>
+</head>
+<body>
+<div id="assets">
+    <!-- CATS -->
+    <img src="assets/cats/alvincat.png" id="cat-alvin">
+    <img src="assets/cats/cutecate.png" id="cat-cute">
+    <img src="assets/cats/davidcat.png" id="cat-david">
+    <img src="assets/cats/fakecat.png" id="cat-fake">
+    <img src="assets/cats/rockincat.png" id="cat-rockin">
+    <img src="assets/cats/sandwhichCat.png" id="cat-sandwich">
+    <!-- second batch -->
+    <img src="assets/cats/neutralcat.png" id="cat-neutral">
+    <img src="assets/cats/elizacat.png" id="cat-eliza">
+    <img src="assets/cats/aidoncat.png" id="cat-aidon">
+    <img src="assets/cats/allancat.png" id="cat-allan">
+    <img src="assets/cats/willcat.png" id="cat-will">
+
+    <!-- FIRE CAT -->
+    <img src="assets/cats/fireplacecat.png" id="fire-cat">
+
+    <img src="assets/poof1.png" id="poof1">
+    <img src="assets/poof2.png" id="poof2">
+    <img src="assets/poof3.png" id="poof3">
+    <img src="assets/poof4.png" id="poof4">
+
+    <!-- PLAYERS -->
+    <img src="assets/player1.png" id="player1">
+    <img src="assets/player1damaged.png" id="player1-damaged">
+    <img src="assets/player2.png" id="player2">
+    <img src="assets/player2damaged.png" id="player2-damaged">
+
+    <!-- BOOMBOX -->
+    <img src="assets/boombox.png" id="boombox">
+
+    <!-- BACKGROUND ELEMENTS -->
+    <img src="assets/wallpaper.png" id="wallpaper">
+    <img src="assets/floor.png" id="floor">
+
+    <img src="assets/fireplace.png" id="fireplace">
+    <img src="assets/firebackversion2.png" id="fireback">
+    <img src="assets/fire1.png" id="fire1">
+    <img src="assets/fire2.png" id="fire2">
+    <img src="assets/fire3.png" id="fire3">
+    <img src="assets/fire4.png" id="fire4">
+
+    <img src="assets/back1.png" id="back1">
+    <img src="assets/back2.png" id="back2">
+    <img src="assets/back3.png" id="back3">
+    <img src="assets/back4.png" id="back4">
+
+    <img src="assets/frame.png" id="frame">
+    <img src="assets/art1.png" id="art1">
+    <img src="assets/art2.png" id="art2">
+    <img src="assets/art3.png" id="art3">
+    <img src="assets/art4.png" id="art4">
+
+    <img src="assets/pot.png" id="pot">
+    <img src="assets/otherpot.png" id="other-pot">
+
+    <img src="assets/lamp.png" id="lamp">
+    <img src="assets/plant.png" id="plant">
+    <img src="assets/couch.png" id="couch">
+    <img src="assets/largeCouch.png" id="large-couch">
+
+    <!-- SCORE / MENU -->
+    <img src="assets/coin.png" id="coin">
+</div>
+<h1>Pat-a-Cat</h1>
+<span id="player1-score">Player 1: <span id="player1-score-value">0</span></span>
+<span id="player2-score">Player 2: <span id="player2-score-value">0</span></span>
+<canvas id="background-canvas"></canvas>
+<canvas id="main-canvas"></canvas>
+<canvas id="hud-canvas"></canvas>
+</body>
+</html>
