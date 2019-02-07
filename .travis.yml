@@ -5,9 +5,7 @@ deploy:
   github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
   keep-history: false
   on:
-    branches:
-      - master
-      - enhancement/travis
+    branch: enhancement/travis
 before_script:
   - npm install
 script: tsc
