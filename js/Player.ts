@@ -1,5 +1,42 @@
+type Controls = {
+	up: string;
+	left: string;
+	down: string;
+	right: string;
+	pat: string;
+}
+
+type PlayerProps = {
+	x: number;
+	y: number;
+	assets: any;
+	element: HTMLElement
+	controls: Controls
+	point: Point
+}
+
 class Player {
-	constructor(props) {
+
+	assets: any;
+	x: number;
+	y: number;
+	controls: Controls;
+	_offsetX: number;
+	_offsetY: number;
+	damaged = false;
+	damagedTime = 0;
+	damagedX = 0;
+	damagedY = 0;
+	patting = false;
+	v = 0;
+	dir = 0;
+	score = 0;
+	scoreElement: HTMLElement;
+	index: number;
+
+	static players: Player[] = [];
+
+	constructor(props: PlayerProps) {
 		this.assets = props.assets;
 
 		this.x = props.x;
@@ -9,17 +46,6 @@ class Player {
 		this._offsetX = props.point.offsetX;
 		this._offsetY = props.point.offsetY;
 
-		this.damaged = false;
-		this.damagedTime = 0;
-		this.damagedX = 0;
-		this.damagedY = 0;
-
-		this.patting = false;
-
-		this.v = 0;
-		this.dir = 0;
-
-		this.score = 0;
 		this.scoreElement = props.element;
 
 		this.index = Player.players.length;
@@ -27,24 +53,24 @@ class Player {
 		Player.players.push(this);
 	}
 
-	pointX() {
+	pointX(): number {
 		return this.x + this._offsetX;
 	}
 
-	pointY() {
+	pointY(): number {
 		return this.y + this._offsetY;
 	}
 
-	_hitOtherPlayer(p) {
+	_hitOtherPlayer(p): boolean {
 		return Math.pow(this.pointX() - p.pointX(), 2) + Math.pow(this.y - p.y, 2) <= 8000;
 	}
 
-	_addScore(s) {
+	_addScore(s): void {
 		this.score += s;
 		this.scoreElement.innerHTML = this.score.toFixed();
 	}
 
-	update(time, width, height, keys) {
+	update(time: number, width: number, height: number, keys: any): void {
 		// Controls
 
 		if (keys[this.controls.up] && !keys[this.controls.left] && !keys[this.controls.right]
@@ -176,7 +202,7 @@ class Player {
 		}
 	}
 
-	draw(ctx, gs) {
+	draw(ctx: CanvasRenderingContext2D, gs: number): void {
 		if (this.patting) {
 			ctx.drawImage((this.damaged ? this.assets.damaged : this.assets.normal)["img"],
 				gs * (this.x - 85), gs * (this.y - 85), gs * 170, gs * 170);
@@ -187,8 +213,3 @@ class Player {
 			gs * (this.x - 100), gs * (this.y - 100), gs * 200, gs * 200);
 	}
 }
-
-/**
- * @type {Player[]}
- */
-Player.players = [];
